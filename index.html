@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zenith Company — Diagnóstico Gratuito</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #ffffff;
+    color: #0a0a0a;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  /* ─── PROGRESS TOP BAR ─── */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: #1a56db;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 100;
+  }
+
+  /* ─── LOGO ─── */
+  .logo {
+    position: fixed;
+    top: 28px; left: 40px;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #0a0a0a;
+    z-index: 100;
+  }
+  .logo span { color: #1a56db; }
+
+  /* ─── STEP COUNTER ─── */
+  .step-counter {
+    position: fixed;
+    top: 28px; right: 40px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #aaa;
+    z-index: 100;
+    letter-spacing: 0.04em;
+  }
+
+  /* ─── MAIN CONTAINER ─── */
+  .quiz-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  /* ─── SCREENS ─── */
+  .screen {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 40px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(40px);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .screen.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateY(0);
+  }
+  .screen.exit-up {
+    opacity: 0;
+    transform: translateY(-40px);
+    pointer-events: none;
+  }
+
+  .screen-inner {
+    width: 100%;
+    max-width: 640px;
+  }
+
+  /* ─── WELCOME SCREEN ─── */
+  .welcome-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #eff6ff;
+    color: #1a56db;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 100px;
+    margin-bottom: 32px;
+  }
+  .welcome-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: #1a56db;
+    border-radius: 50%;
+    animation: blink 1.5s infinite;
+  }
+  @keyframes blink {
+    0%,100% { opacity: 1; } 50% { opacity: 0.3; }
+  }
+
+  .welcome-title {
+    font-size: clamp(36px, 6vw, 56px);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    color: #0a0a0a;
+    margin-bottom: 20px;
+  }
+  .welcome-title .blue { color: #1a56db; }
+
+  .welcome-sub {
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1.65;
+    color: #555;
+    max-width: 480px;
+    margin-bottom: 48px;
+  }
+
+  .welcome-meta {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 40px;
+    padding: 16px 20px;
+    background: #f8f9ff;
+    border: 1px solid #e8eeff;
+    border-radius: 12px;
+  }
+  .meta-item { display: flex; flex-direction: column; gap: 2px; }
+  .meta-val {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1a56db;
+    line-height: 1;
+  }
+  .meta-label { font-size: 11px; color: #888; }
+  .meta-sep { width: 1px; height: 32px; background: #e0e0e0; }
+
+  /* ─── QUESTION SCREEN ─── */
+  .q-number {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #1a56db;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .q-number::after {
+    content: '';
+    height: 1px;
+    width: 32px;
+    background: #1a56db;
+    opacity: 0.4;
+  }
+
+  .q-title {
+    font-size: clamp(26px, 4vw, 38px);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    color: #0a0a0a;
+    margin-bottom: 10px;
+  }
+
+  .q-sub {
+    font-size: 15px;
+    color: #888;
+    margin-bottom: 36px;
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  /* ─── OPTIONS ─── */
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border: 1.5px solid #e8e8e8;
+    background: #fff;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+  }
+  .option::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 0;
+    background: #eff6ff;
+    transition: width 0.3s ease;
+    z-index: 0;
+  }
+  .option:hover { border-color: #1a56db; }
+  .option:hover::before { width: 100%; }
+  .option.selected {
+    border-color: #1a56db;
+    background: #eff6ff;
+  }
+
+  .option-key {
+    width: 28px; height: 28px;
+    border: 1.5px solid #ddd;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #aaa;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    position: relative;
+    z-index: 1;
+  }
+  .option:hover .option-key,
+  .option.selected .option-key {
+    border-color: #1a56db;
+    color: #1a56db;
+    background: white;
+  }
+
+  .option-text {
+    font-size: 15px;
+    font-weight: 500;
+    color: #1a1a1a;
+    position: relative;
+    z-index: 1;
+    line-height: 1.4;
+  }
+  .option-sub {
+    font-size: 12px;
+    color: #999;
+    margin-top: 2px;
+    font-weight: 400;
+  }
+  .option-emoji {
+    font-size: 20px;
+    margin-left: auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* 2-COL GRID OPTIONS */
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .options-grid .option { flex-direction: column; align-items: flex-start; padding: 20px; gap: 10px; }
+  .options-grid .option-emoji { margin-left: 0; font-size: 24px; }
+  .options-grid .option-text { font-size: 14px; }
+
+  /* ─── INPUT FIELDS ─── */
+  .input-wrap { position: relative; margin-bottom: 8px; }
+  .input-wrap input {
+    width: 100%;
+    border: none;
+    border-bottom: 2px solid #e0e0e0;
+    padding: 14px 0;
+    font-size: 22px;
+    font-weight: 600;
+    color: #0a0a0a;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    background: transparent;
+    transition: border-color 0.2s;
+  }
+  .input-wrap input:focus { border-color: #1a56db; }
+  .input-wrap input::placeholder { color: #ccc; font-weight: 400; font-size: 20px; }
+
+  .input-hint {
+    font-size: 12px;
+    color: #aaa;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .input-hint kbd {
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 10px;
+    font-family: 'Inter', sans-serif;
+    color: #666;
+  }
+
+  .field-error {
+    font-size: 12px;
+    color: #e53e3e;
+    margin-top: 6px;
+    display: none;
+  }
+  .field-error.show { display: block; }
+
+  /* ─── BUTTON ─── */
+  .btn-continue {
+    margin-top: 28px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #1a56db;
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.01em;
+  }
+  .btn-continue:hover { background: #1544b8; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(26,86,219,0.25); }
+  .btn-continue:active { transform: translateY(0); }
+
+  .btn-arrow { font-size: 18px; transition: transform 0.2s; }
+  .btn-continue:hover .btn-arrow { transform: translateX(4px); }
+
+  /* ─── NAV BOTTOM ─── */
+  .nav-bottom {
+    position: fixed;
+    bottom: 32px; left: 0; right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    z-index: 100;
+  }
+
+  .btn-back {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: 1.5px solid #e0e0e0;
+    color: #888;
+    padding: 10px 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-back:hover { border-color: #bbb; color: #555; }
+  .btn-back.hidden { opacity: 0; pointer-events: none; }
+
+  /* ─── XP / SCORE ─── */
+  .xp-bar {
+    position: fixed;
+    bottom: 32px; right: 40px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 100;
+  }
+  .xp-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #1a56db;
+    letter-spacing: 0.08em;
+  }
+  .xp-dots { display: flex; gap: 5px; }
+  .xp-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #e8e8e8;
+    transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+  }
+  .xp-dot.filled { background: #1a56db; transform: scale(1.2); }
+
+  /* ─── SUCCESS SCREEN ─── */
+  .success-wrap { text-align: center; }
+  .success-icon {
+    width: 72px; height: 72px;
+    background: #eff6ff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    margin: 0 auto 28px;
+    animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes popIn {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .success-title {
+    font-size: 38px;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    margin-bottom: 12px;
+    color: #0a0a0a;
+  }
+  .success-title .blue { color: #1a56db; }
+  .success-sub {
+    font-size: 16px;
+    color: #666;
+    line-height: 1.6;
+    max-width: 420px;
+    margin: 0 auto 40px;
+  }
+  .success-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: #0a0a0a;
+    color: white;
+    padding: 16px 28px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 32px;
+  }
+  .success-card .dot { width: 8px; height: 8px; background: #4ade80; border-radius: 50%; animation: blink 1.5s infinite; }
+
+  .xp-final {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+  }
+  .xp-final-dots { display: flex; gap: 5px; }
+  .xp-final-dot {
+    width: 10px; height: 10px;
+    background: #1a56db;
+    border-radius: 50%;
+    animation: fillPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  .xp-final-dot:nth-child(1) { animation-delay: 0.1s; }
+  .xp-final-dot:nth-child(2) { animation-delay: 0.2s; }
+  .xp-final-dot:nth-child(3) { animation-delay: 0.3s; }
+  .xp-final-dot:nth-child(4) { animation-delay: 0.4s; }
+  .xp-final-dot:nth-child(5) { animation-delay: 0.5s; }
+  .xp-final-dot:nth-child(6) { animation-delay: 0.6s; }
+  .xp-final-dot:nth-child(7) { animation-delay: 0.7s; }
+  .xp-final-dot:nth-child(8) { animation-delay: 0.8s; }
+  @keyframes fillPop {
+    from { transform: scale(0); opacity: 0; background: #e8e8e8; }
+    to { transform: scale(1); opacity: 1; background: #1a56db; }
+  }
+  .xp-final-label { font-size: 12px; font-weight: 700; color: #1a56db; letter-spacing: 0.08em; }
+
+  /* ─── TRANSITION FLASH ─── */
+  .flash {
+    position: fixed;
+    inset: 0;
+    background: #1a56db;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 200;
+    transition: opacity 0.15s;
+  }
+
+  @media (max-width: 600px) {
+    .logo { left: 20px; top: 20px; }
+    .step-counter { right: 20px; top: 20px; }
+    .screen { padding: 80px 24px; }
+    .options-grid { grid-template-columns: 1fr; }
+    .welcome-meta { flex-wrap: wrap; gap: 16px; }
+    .xp-bar { right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar" style="width:0%"></div>
+<div class="flash" id="flash"></div>
+
+<div class="logo">ZENITH<span>.</span></div>
+<div class="step-counter" id="stepCounter"></div>
+
+<div class="quiz-container">
+
+  <!-- ══════════════════════════════ -->
+  <!-- SCREEN 0 — WELCOME -->
+  <!-- ══════════════════════════════ -->
+  <div class="screen active" id="screen-0">
+    <div class="screen-inner">
+      <div class="welcome-tag">Diagnóstico gratuito · 2 minutos</div>
+      <h1 class="welcome-title">Pronto pra<br>escalar com<br><span class="blue">tráfego pago?</span></h1>
+      <p class="welcome-sub">Responda 8 perguntas rápidas e descubra o potencial do seu negócio. Nossa equipe fará uma análise personalizada e entra em contato em até 24h.</p>
+      <div class="welcome-meta">
+        <div class="meta-item">
+          <span class="meta-val">8</span>
+          <span class="meta-label">Perguntas</span>
+        </div>
+        <div class="meta-sep"></div>
+        <div class="meta-item">
+          <span class="meta-val">2min</span>
+          <span class="meta-label">Tempo médio</span>
+        </div>
+        <div class="meta-sep"></div>
+        <div class="meta-item">
+          <span class="meta-val">100%</span>
+          <span class="meta-label">Gratuito</span>
+        </div>
+        <div class="meta-sep"></div>
+        <div class="meta-item">
+          <span class="meta-val">24h</span>
+          <span class="meta-label">Retorno</span>
+        </div>
+      </div>
+      <button class="btn-continue" onclick="goTo(1)">
+        Começar agora
+        <span class="btn-arrow">→</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ -->
+  <!-- SCREEN 1 — NOME -->
+  <!-- ══════════════════════════════ -->
+  <div class="screen" id="screen-1">
+    <div class="screen-inner">
+      <div class="q-number">01</div>
+      <h2 class="q-title">Como podemos te chamar?</h2>
+      <p class="q-sub">Seu primeiro nome já basta.</p>
+      <div class="input-wrap">
+        <input type="text" id="nome" placeholder="Digite seu nome..." autocomplete="off" onkeydown="if(event.key==='Enter') nextFromInput('nome','err-nome')">
+      </div>
+      <span class="field-error" id="err-nome">Por favor, informe seu nome.</span>
+      <div class="input-hint">Pressione <kbd>Enter</kbd> para continuar</div>
+      <br>
+      <button class="btn-continue" onclick="nextFromInput('nome','err-nome')">
+        Continuar <span class="btn-arrow">→</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ -->
+  <!-- SCREEN 2 — SEGMENTO -->
+  <!-- ══════════════════════════════ -->
+  <div class="screen" id="screen-2">
+    <div class="screen-inner">
+      <div class="q-number">02</div>
+      <h2 class="q-title" id="q2-title">Qual é o seu segmento?</h2>
+      <p class="q-sub">Escolha o que melhor descreve o seu negócio.</p>
+      <div class="options-grid" id="nicho-options">
+        <div class="option" onclick="selectOption(this,'nicho','E-commerce')">
+          <div class="option-emoji">🛒</div>
+          <div class="option-text">E-commerce</div>
+        </div>
+        <div class="option" onclick="selectOption(this,'nicho','Infoproduto')">
+          <div class="option-emoji">🎓</div>
+          <div class="option-text">Infoproduto</div>
+        </div>
+        <div class="option" onclick="selectOption(this,'nicho','Saúde & Clínicas')">
+          <div class="option-emoji">🏥</div>
+          <div class="option-text">Saúde & Clínicas</div>
+        </div>
+        <div class="option" onclick="selectOption(this,'nicho','Advocacia / Jurídico')">
+          <div class="option-emoji">⚖️</div>
+          <div class="option-text">Advocacia</div>
+        </div>
+        <div class="option" onclick="selectOption(this,'nicho','Imóveis')">
+          <div class="option-emoji">🏠</div>
+          <div class="option-text">Imóveis</div>
+        </div>
+        <div class="option" onclick="selectOption(this,'nicho','B2B / Serviços')">
+          <div class="option-emoji">🤝</div>
+          <div class="option-text">B2B / Serviços</div>
+        </div>
+        <div class="option" onclick="selectOption(this,'nicho','Importação')">
+          <div class="option-emoji">📦</div>
+          <div class="option-text">Importação</div>
+        </div>
+        <div class="option" onclick="selectOption(this,'nicho','Outro')">
+          <div class="option-emoji">💡</div>
+          <div class="option-text">Outro</div>
+        </div>
+      </div>
+      <span class="field-error" id="err-nicho">Selecione uma opção para continuar.</span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ -->
+  <!-- SCREEN 3 — FATURAMENTO -->
+  <!-- ══════════════════════════════ -->
+  <div class="screen" id="screen-3">
+    <div class="screen-inner">
+      <div class="q-number">03</div>
+      <h2 class="q-title">Qual é o seu faturamento mensal?</h2>
+      <p class="q-sub">Não precisa ser exato. Uma faixa já nos ajuda muito.</p>
+      <div class="options" id="faturamento-options">
+        <div class="option" onclick="selectOption(this,'faturamento','Até R$10.000')">
+          <div class="option-key">A</div>
+          <div><div class="option-text">Até R$10.000</div></div>
+        </div>
+        <div class="option" onclick="selectOption(this,'faturamento','R$10K – R$30K')">
+          <div class="option-key">B</div>
+          <div><div class="option-text">Entre R$10.000 e R$30.000</div></div>
+        </div>
+        <div class="option" onclick="selectOption(this,'faturamento','R$30K – R$100K')">
+          <div class="option-key">C</div>
+          <div><div class="option-text">Entre R$30.000 e R$100.000</div></div>
+        </div>
+        <div class="option" onclick="selectOption(this,'faturamento','R$100K – R$300K')">
+          <div class="option-key">D</div>
+          <div><div class="option-text">Entre R$100.000 e R$300.000</div></div>
+        </div>
+        <div class="option" onclick="selectOption(this,'faturamento','Acima de R$300K')">
+          <div class="option-key">E</div>
+          <div><div class="option-text">Acima de R$300.000</div></div>
+        </div>
+      </div>
+      <span class="field-error" id="err-faturamento">Selecione uma opção.</span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ -->
+  <!-- SCREEN 4 — INVESTIMENTO -->
+  <!-- ══════════════════════════════ -->
+  <div class="screen" id="screen-4">
+    <div class="screen-inner">
+      <div class="q-number">04</div>
+      <h2 class="q-title">Quanto você pensa em investir em tráfego por mês?</h2>
+      <p class="q-sub">Esse valor é a verba de anúncio, não o valor da gestão.</p>
+      <div class="options" id="investimento-options">
+        <div class="option" onclick="selectOption(this,'investimento','Até R$1.000')">
+          <div class="option-key">A</div>
+          <div><div class="option-text">Até R$1.000</div><div class="option-sub">Ideal para quem está começando</div></div>
+        </div>
+        <div class="option" onclick="selectOption(this,'investimento','R$1K – R$3K')">
+          <div class="option-key">B</div>
+          <div><div class="option-text">Entre R$1.000 e R$3.000</div><div class="option-sub">Fase de validação</div></div>
+        </div>
+        <div class="option" onclick="selectOption(this,'investimento','R$3K – R$10K')">
+          <div class="option-key">C</div>
+          <div><div class="option-text">Entre R$3.000 e R$10.000</div><div class="option-sub">Escalada controlada</div></div>
+        </div>
+        <div class="option" onclick="selectOption(this,'investimento','R$10K – R$30K')">
+          <div class="option-key">D</div>
+          <div><div class="option-text">Entre R$10.000 e R$30.000</div><div class="option-sub">Alta performance</div></div>
+        </div>
+        <div class="option" onclick="selectOption(this,'investimento','Acima de R$30K')">
+          <div class="option-key">E</div>
+          <div><div class="option-text">Acima de R$30.000</div><div class="option-sub">Máxima escala</div></div>
+        </div>
+      </div>
+      <span class="field-error" id="err-investimento">Selecione uma opção.</span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ -->
+  <!-- SCREEN 5 — EXPERIÊNCIA -->
+  <!-- ══════════════════════════════ -->
+  <div class="screen" id="screen-5">
+    <div class="screen-inner">
+      <div class="q-number">05</div>
+      <h2 class="q-title">Você já investiu em tráfego pago antes?</h2>
+      <p class="q-sub">Seja honesto — isso ajuda a montar a melhor estratégia para você.</p>
+      <div class="options" id="trafego-options">
+        <div class="option" onclick="selectOption(this,'trafego','Nunca investi — é minha primeira vez')">
+          <div class="option-key">A</div>
+          <div><div class="option-text">Nunca investi — é minha primeira vez</div></div>
+        </div>
+        <div class="option" onclick="selectOption(this,'trafego','Já tentei, mas não tive resultado')">
+          <div class="option-key">B</div>
+          <div><div class="option-text">Já tentei, mas não tive resultado</div></div>
+        </div>
+        <div class="option" onclick="selectOption(this,'trafego','Invisto sozinho e quero melhorar')">
+          <div class="option-key">C</div>
+          <div><div class="option-text">Invisto sozinho e quero melhorar</div></div>
+        </div>
+        <div class="option" onclick="selectOption(this,'trafego','Tenho outra agência e quero trocar')">
+          <div class="option-key">D</div>
+          <div><div class="option-text">Tenho outra agência e quero trocar</div></div>
+        </div>
+      </div>
+      <span class="field-error" id="err-trafego">Selecione uma opção.</span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ -->
+  <!-- SCREEN 6 — DESAFIO -->
+  <!-- ══════════════════════════════ -->
+  <div class="screen" id="screen-6">
+    <div class="screen-inner">
+      <div class="q-number">06</div>
+      <h2 class="q-title">Qual é a sua maior dificuldade hoje?</h2>
+      <p class="q-sub">Selecione o que mais te trava no momento.</p>
+      <div class="options" id="desafio-options">
+        <div class="option" onclick="selectOption(this,'desafio','Não gero leads suficientes')">
+          <div class="option-key">A</div>
+          <div><div class="option-text">Não gero leads suficientes</div></div>
+        </div>
+        <div class="option" onclick="selectOption(this,'desafio','Gero leads mas não converto em vendas')">
+          <div class="option-key">B</div>
+          <div><div class="option-text">Gero leads mas não converto em vendas</div></div>
+        </div>
+        <div class="option" onclick="selectOption(this,'desafio','Meu custo por aquisição está alto demais')">
+          <div class="option-key">C</div>
+          <div><div class="option-text">Meu custo por aquisição está alto demais</div></div>
+        </div>
+        <div class="option" onclick="selectOption(this,'desafio','Não consigo escalar de forma consistente')">
+          <div class="option-key">D</div>
+          <div><div class="option-text">Não consigo escalar de forma consistente</div></div>
+        </div>
+        <div class="option" onclick="selectOption(this,'desafio','Não tenho presença digital estruturada')">
+          <div class="option-key">E</div>
+          <div><div class="option-text">Não tenho presença digital estruturada</div></div>
+        </div>
+      </div>
+      <span class="field-error" id="err-desafio">Selecione uma opção.</span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ -->
+  <!-- SCREEN 7 — EMAIL -->
+  <!-- ══════════════════════════════ -->
+  <div class="screen" id="screen-7">
+    <div class="screen-inner">
+      <div class="q-number">07</div>
+      <h2 class="q-title">Qual é o seu melhor e-mail?</h2>
+      <p class="q-sub">Vamos enviar um resumo da sua análise por aqui.</p>
+      <div class="input-wrap">
+        <input type="email" id="email" placeholder="seu@email.com" autocomplete="off" onkeydown="if(event.key==='Enter') nextFromInput('email','err-email',true)">
+      </div>
+      <span class="field-error" id="err-email">Insira um e-mail válido.</span>
+      <div class="input-hint">Pressione <kbd>Enter</kbd> para continuar</div>
+      <br>
+      <button class="btn-continue" onclick="nextFromInput('email','err-email',true)">
+        Continuar <span class="btn-arrow">→</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ -->
+  <!-- SCREEN 8 — WHATSAPP -->
+  <!-- ══════════════════════════════ -->
+  <div class="screen" id="screen-8">
+    <div class="screen-inner">
+      <div class="q-number">08</div>
+      <h2 class="q-title">E o seu WhatsApp?</h2>
+      <p class="q-sub">Última etapa! Nossa equipe vai entrar em contato em até 24h.</p>
+      <div class="input-wrap">
+        <input type="tel" id="telefone" placeholder="(00) 00000-0000" autocomplete="off" onkeydown="if(event.key==='Enter') submitQuiz()" oninput="maskPhone(this)">
+      </div>
+      <span class="field-error" id="err-telefone">Insira um WhatsApp válido.</span>
+      <div class="input-hint">Pressione <kbd>Enter</kbd> para enviar</div>
+      <br>
+      <button class="btn-continue" onclick="submitQuiz()">
+        Enviar diagnóstico <span class="btn-arrow">→</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ -->
+  <!-- SCREEN 9 — SUCCESS -->
+  <!-- ══════════════════════════════ -->
+  <div class="screen" id="screen-9">
+    <div class="screen-inner">
+      <div class="success-wrap">
+        <div class="success-icon">✅</div>
+        <h2 class="success-title">Tudo <span class="blue">certo!</span></h2>
+        <p class="success-sub">Seus dados chegaram com sucesso. Um estrategista da Zenith vai analisar seu perfil e entrar em contato no seu WhatsApp em até <strong>24 horas</strong>.</p>
+        <div class="success-card">
+          <div class="dot"></div>
+          <span id="success-name">Olá!</span> — aguarde o contato da Zenith 👋
+        </div>
+        <p style="font-size:13px; color:#aaa; margin-bottom: 16px;">Progresso completo</p>
+        <div class="xp-final">
+          <div class="xp-final-dots">
+            <div class="xp-final-dot"></div>
+            <div class="xp-final-dot"></div>
+            <div class="xp-final-dot"></div>
+            <div class="xp-final-dot"></div>
+            <div class="xp-final-dot"></div>
+            <div class="xp-final-dot"></div>
+            <div class="xp-final-dot"></div>
+            <div class="xp-final-dot"></div>
+          </div>
+          <span class="xp-final-label">8 / 8 ETAPAS</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end quiz-container -->
+
+<!-- NAV BOTTOM -->
+<div class="nav-bottom" id="navBottom">
+  <button class="btn-back hidden" id="btnBack" onclick="goBack()">← Voltar</button>
+</div>
+
+<!-- XP BAR -->
+<div class="xp-bar" id="xpBar" style="display:none">
+  <span class="xp-label">PROGRESSO</span>
+  <div class="xp-dots" id="xpDots"></div>
+</div>
+
+<script>
+  // ─── STATE ───
+  let currentScreen = 0;
+  const totalQuestions = 8;
+  const answers = {};
+
+  // Render XP dots
+  const xpDots = document.getElementById('xpDots');
+  for (let i = 0; i < totalQuestions; i++) {
+    const d = document.createElement('div');
+    d.className = 'xp-dot';
+    d.id = 'dot-' + i;
+    xpDots.appendChild(d);
+  }
+
+  // ─── NAVIGATION ───
+  function goTo(n) {
+    const prev = document.getElementById('screen-' + currentScreen);
+    prev.classList.remove('active');
+    prev.classList.add('exit-up');
+    setTimeout(() => prev.classList.remove('exit-up'), 600);
+
+    currentScreen = n;
+    const next = document.getElementById('screen-' + n);
+    next.classList.add('active');
+
+    // Focus input if exists
+    setTimeout(() => {
+      const inp = next.querySelector('input');
+      if (inp) inp.focus();
+    }, 500);
+
+    updateUI();
+  }
+
+  function goBack() {
+    if (currentScreen <= 1) return;
+    const prev = document.getElementById('screen-' + currentScreen);
+    prev.classList.remove('active');
+    prev.style.transition = 'none';
+    prev.style.opacity = '0';
+    prev.style.transform = 'translateY(40px)';
+    setTimeout(() => { prev.style.transition = ''; }, 50);
+
+    currentScreen--;
+    const next = document.getElementById('screen-' + currentScreen);
+    next.classList.add('active');
+    next.style.transition = 'none';
+    next.style.opacity = '0';
+    next.style.transform = 'translateY(-40px)';
+    setTimeout(() => {
+      next.style.transition = '';
+      next.style.opacity = '1';
+      next.style.transform = 'translateY(0)';
+    }, 50);
+
+    updateUI();
+  }
+
+  function updateUI() {
+    const isQuestion = currentScreen >= 1 && currentScreen <= totalQuestions;
+    const isWelcome = currentScreen === 0;
+    const isSuccess = currentScreen === totalQuestions + 1;
+
+    // Progress bar
+    const pct = isWelcome ? 0 : isSuccess ? 100 : (currentScreen / totalQuestions) * 100;
+    document.getElementById('progressBar').style.width = pct + '%';
+
+    // Counter
+    const counter = document.getElementById('stepCounter');
+    counter.textContent = isQuestion ? currentScreen + ' de ' + totalQuestions : '';
+
+    // Back button
+    const back = document.getElementById('btnBack');
+    if (currentScreen > 1 && !isSuccess) {
+      back.classList.remove('hidden');
+    } else {
+      back.classList.add('hidden');
+    }
+
+    // XP bar
+    const xpBar = document.getElementById('xpBar');
+    xpBar.style.display = isQuestion ? 'flex' : 'none';
+
+    // Fill dots
+    for (let i = 0; i < totalQuestions; i++) {
+      const dot = document.getElementById('dot-' + i);
+      if (i < currentScreen) {
+        dot.classList.add('filled');
+      } else {
+        dot.classList.remove('filled');
+      }
+    }
+
+    // Update q2 title with name
+    if (currentScreen === 2 && answers.nome) {
+      document.getElementById('q2-title').textContent = answers.nome.split(' ')[0] + ', qual é o seu segmento?';
+    }
+  }
+
+  // ─── OPTION SELECT ───
+  function selectOption(el, key, value) {
+    const parent = el.parentElement;
+    parent.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    answers[key] = value;
+
+    // Hide error
+    const errEl = document.getElementById('err-' + key);
+    if (errEl) errEl.classList.remove('show');
+
+    // Auto-advance after short delay
+    setTimeout(() => {
+      if (currentScreen < totalQuestions) goTo(currentScreen + 1);
+    }, 350);
+  }
+
+  // ─── INPUT VALIDATION ───
+  function nextFromInput(fieldId, errId, isEmail) {
+    const val = document.getElementById(fieldId).value.trim();
+    const errEl = document.getElementById(errId);
+
+    if (!val || (isEmail && !/\S+@\S+\.\S+/.test(val))) {
+      errEl.classList.add('show');
+      document.getElementById(fieldId).focus();
+      return;
+    }
+    errEl.classList.remove('show');
+    answers[fieldId] = val;
+    goTo(currentScreen + 1);
+  }
+
+  // ─── PHONE MASK ───
+  function maskPhone(input) {
+    let v = input.value.replace(/\D/g, '');
+    if (v.length <= 11) {
+      v = v.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+      v = v.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
+      v = v.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+      v = v.replace(/^(\d{0,2})/, '($1');
+    }
+    input.value = v;
+  }
+
+  // ─── SUBMIT ───
+  function submitQuiz() {
+    const tel = document.getElementById('telefone').value.trim();
+    const errEl = document.getElementById('err-telefone');
+    if (!tel || tel.replace(/\D/g,'').length < 10) {
+      errEl.classList.add('show');
+      document.getElementById('telefone').focus();
+      return;
+    }
+    errEl.classList.remove('show');
+    answers.telefone = tel;
+    answers.timestamp = new Date().toLocaleString('pt-BR');
+
+    // Save locally
+    const leads = JSON.parse(localStorage.getItem('zenith_leads') || '[]');
+    leads.push(answers);
+    localStorage.setItem('zenith_leads', JSON.stringify(leads));
+
+    // Success
+    document.getElementById('success-name').textContent = 'Olá, ' + (answers.nome ? answers.nome.split(' ')[0] : '') + '!';
+
+    // Go to success
+    const prev = document.getElementById('screen-' + currentScreen);
+    prev.classList.remove('active');
+    prev.classList.add('exit-up');
+
+    currentScreen = 9;
+    const next = document.getElementById('screen-9');
+    next.classList.add('active');
+
+    document.getElementById('progressBar').style.width = '100%';
+    document.getElementById('stepCounter').textContent = '';
+    document.getElementById('btnBack').classList.add('hidden');
+    document.getElementById('xpBar').style.display = 'none';
+  }
+
+  // ─── KEYBOARD SHORTCUTS ───
+  document.addEventListener('keydown', (e) => {
+    const screen = document.getElementById('screen-' + currentScreen);
+    const options = screen.querySelectorAll('.options .option, .options-grid .option');
+
+    if (options.length > 0 && !screen.querySelector('input')) {
+      const keys = ['a','b','c','d','e','f','g','h'];
+      const idx = keys.indexOf(e.key.toLowerCase());
+      if (idx >= 0 && idx < options.length) {
+        options[idx].click();
+      }
+    }
+  });
+
+  // Init
+  updateUI();
+</script>
+</body>
+</html>
