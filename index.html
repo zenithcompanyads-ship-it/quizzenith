@@ -5,1023 +5,1134 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zenith Company — Diagnóstico Gratuito</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<!-- ── META PIXEL ── -->
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1890815838988033');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1890815838988033&ev=PageView&noscript=1"/></noscript>
+<!-- ── FIM META PIXEL ── -->
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { height: 100%; }
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { height:100%; }
 
-  body {
-    font-family: 'Inter', sans-serif;
-    background: #ffffff;
-    color: #0a0a0a;
-    overflow: hidden;
-    height: 100vh;
-  }
+body {
+  font-family:'Inter',sans-serif;
+  background:#fff;
+  color:#0a0a0a;
+  overflow:hidden;
+  height:100vh;
+}
 
-  /* ─── PROGRESS TOP BAR ─── */
-  .progress-bar {
-    position: fixed;
-    top: 0; left: 0;
-    height: 3px;
-    background: #1a56db;
-    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 100;
-  }
+/* ── PROGRESS BAR ── */
+.progress-bar {
+  position:fixed; top:0; left:0;
+  height:3px; background:#1a56db;
+  transition:width 0.6s cubic-bezier(0.4,0,0.2,1);
+  z-index:200;
+}
 
-  /* ─── LOGO ─── */
-  .logo {
-    position: fixed;
-    top: 28px; left: 40px;
-    font-size: 15px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    color: #0a0a0a;
-    z-index: 100;
-  }
-  .logo span { color: #1a56db; }
+/* ── LOGO ── */
+.logo {
+  position:fixed; top:24px; left:28px;
+  font-size:14px; font-weight:800; letter-spacing:0.08em;
+  color:#0a0a0a; z-index:200;
+}
+.logo span { color:#1a56db; }
 
-  /* ─── STEP COUNTER ─── */
-  .step-counter {
-    position: fixed;
-    top: 28px; right: 40px;
-    font-size: 12px;
-    font-weight: 500;
-    color: #aaa;
-    z-index: 100;
-    letter-spacing: 0.04em;
-  }
+/* ── STEP COUNTER ── */
+.step-counter {
+  position:fixed; top:24px; right:28px;
+  font-size:12px; font-weight:500; color:#bbb;
+  z-index:200; letter-spacing:0.04em;
+}
 
-  /* ─── MAIN CONTAINER ─── */
-  .quiz-container {
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-  }
+/* ── SCREENS ── */
+.quiz-wrap {
+  width:100%; height:100vh;
+  display:flex; align-items:center; justify-content:center;
+  position:relative;
+}
 
-  /* ─── SCREENS ─── */
-  .screen {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 80px 40px;
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(40px);
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .screen.active {
-    opacity: 1;
-    pointer-events: all;
-    transform: translateY(0);
-  }
-  .screen.exit-up {
-    opacity: 0;
-    transform: translateY(-40px);
-    pointer-events: none;
-  }
+.screen {
+  position:absolute; width:100%; height:100%;
+  display:flex; align-items:center; justify-content:center;
+  padding:72px 28px 80px;
+  opacity:0; pointer-events:none;
+  transform:translateY(36px);
+  transition:opacity 0.5s cubic-bezier(0.4,0,0.2,1),
+              transform 0.5s cubic-bezier(0.4,0,0.2,1);
+  overflow-y:auto;
+}
+.screen.active  { opacity:1; pointer-events:all; transform:translateY(0); }
+.screen.exit-up { opacity:0; transform:translateY(-36px); pointer-events:none; }
 
-  .screen-inner {
-    width: 100%;
-    max-width: 640px;
-  }
+.inner { width:100%; max-width:480px; }
 
-  /* ─── WELCOME SCREEN ─── */
-  .welcome-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: #eff6ff;
-    color: #1a56db;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 6px 14px;
-    border-radius: 100px;
-    margin-bottom: 32px;
-  }
-  .welcome-tag::before {
-    content: '';
-    width: 6px; height: 6px;
-    background: #1a56db;
-    border-radius: 50%;
-    animation: blink 1.5s infinite;
-  }
-  @keyframes blink {
-    0%,100% { opacity: 1; } 50% { opacity: 0.3; }
-  }
+/* ══════════════════════════════
+   WELCOME
+══════════════════════════════ */
+.tag {
+  display:inline-flex; align-items:center; gap:7px;
+  background:#eff6ff; color:#1a56db;
+  font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase;
+  padding:5px 12px; border-radius:100px; margin-bottom:24px;
+}
+.tag::before {
+  content:''; width:5px; height:5px;
+  background:#1a56db; border-radius:50%;
+  animation:blink 1.5s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
-  .welcome-title {
-    font-size: clamp(36px, 6vw, 56px);
-    font-weight: 900;
-    line-height: 1.05;
-    letter-spacing: -0.03em;
-    color: #0a0a0a;
-    margin-bottom: 20px;
-  }
-  .welcome-title .blue { color: #1a56db; }
+.welcome-h {
+  font-size:clamp(34px,8vw,52px); font-weight:900;
+  line-height:1.05; letter-spacing:-0.03em;
+  color:#0a0a0a; margin-bottom:16px;
+}
+.welcome-h .blue { color:#1a56db; }
 
-  .welcome-sub {
-    font-size: 17px;
-    font-weight: 400;
-    line-height: 1.65;
-    color: #555;
-    max-width: 480px;
-    margin-bottom: 48px;
-  }
+.welcome-p {
+  font-size:15px; font-weight:400; line-height:1.65;
+  color:#666; max-width:400px; margin-bottom:32px;
+}
 
-  .welcome-meta {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    margin-bottom: 40px;
-    padding: 16px 20px;
-    background: #f8f9ff;
-    border: 1px solid #e8eeff;
-    border-radius: 12px;
-  }
-  .meta-item { display: flex; flex-direction: column; gap: 2px; }
-  .meta-val {
-    font-size: 18px;
-    font-weight: 800;
-    color: #1a56db;
-    line-height: 1;
-  }
-  .meta-label { font-size: 11px; color: #888; }
-  .meta-sep { width: 1px; height: 32px; background: #e0e0e0; }
+.welcome-pills {
+  display:flex; flex-wrap:wrap; gap:8px; margin-bottom:32px;
+}
+.pill {
+  display:flex; align-items:center; gap:6px;
+  background:#f5f5f5; border-radius:100px;
+  padding:7px 14px; font-size:12px; font-weight:600; color:#444;
+}
+.pill-dot { width:6px; height:6px; background:#1a56db; border-radius:50%; }
 
-  /* ─── QUESTION SCREEN ─── */
-  .q-number {
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    color: #1a56db;
-    text-transform: uppercase;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .q-number::after {
-    content: '';
-    height: 1px;
-    width: 32px;
-    background: #1a56db;
-    opacity: 0.4;
-  }
+/* ══════════════════════════════
+   VALUE SCREENS — shared
+══════════════════════════════ */
+.v-tag {
+  display:inline-flex; align-items:center; gap:8px;
+  font-size:10px; font-weight:700; letter-spacing:0.12em;
+  text-transform:uppercase; color:#1a56db; margin-bottom:18px;
+}
+.v-tag::before { content:''; width:16px; height:1px; background:#1a56db; }
 
-  .q-title {
-    font-size: clamp(26px, 4vw, 38px);
-    font-weight: 800;
-    line-height: 1.15;
-    letter-spacing: -0.025em;
-    color: #0a0a0a;
-    margin-bottom: 10px;
-  }
+.v-h {
+  font-size:clamp(26px,6vw,38px); font-weight:900;
+  line-height:1.08; letter-spacing:-0.028em;
+  color:#0a0a0a; margin-bottom:10px;
+}
+.v-h .blue { color:#1a56db; }
+.v-h .muted { color:#bbb; }
 
-  .q-sub {
-    font-size: 15px;
-    color: #888;
-    margin-bottom: 36px;
-    font-weight: 400;
-    line-height: 1.5;
-  }
+.v-p {
+  font-size:14px; color:#888; line-height:1.6;
+  max-width:400px; margin-bottom:28px;
+}
 
-  /* ─── OPTIONS ─── */
-  .options {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
+/* ── BTN ROW ── */
+.btn-row { display:flex; align-items:center; gap:16px; margin-top:4px; }
 
-  .option {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 16px 20px;
-    border: 1.5px solid #e8e8e8;
-    background: #fff;
-    cursor: pointer;
-    border-radius: 10px;
-    transition: all 0.2s ease;
-    user-select: none;
-    position: relative;
-    overflow: hidden;
-  }
-  .option::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 0;
-    background: #eff6ff;
-    transition: width 0.3s ease;
-    z-index: 0;
-  }
-  .option:hover { border-color: #1a56db; }
-  .option:hover::before { width: 100%; }
-  .option.selected {
-    border-color: #1a56db;
-    background: #eff6ff;
-  }
+.btn-main {
+  display:inline-flex; align-items:center; gap:8px;
+  background:#1a56db; color:#fff; border:none;
+  padding:14px 26px; border-radius:10px;
+  font-family:'Inter',sans-serif; font-weight:700; font-size:14px;
+  cursor:pointer; transition:all 0.2s; letter-spacing:0.01em;
+}
+.btn-main:hover { background:#1544b8; transform:translateY(-1px); box-shadow:0 8px 20px rgba(26,86,219,0.22); }
+.arrow { display:inline-block; transition:transform 0.2s; }
+.btn-main:hover .arrow { transform:translateX(3px); }
 
-  .option-key {
-    width: 28px; height: 28px;
-    border: 1.5px solid #ddd;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 700;
-    color: #aaa;
-    flex-shrink: 0;
-    transition: all 0.2s;
-    position: relative;
-    z-index: 1;
-  }
-  .option:hover .option-key,
-  .option.selected .option-key {
-    border-color: #1a56db;
-    color: #1a56db;
-    background: white;
-  }
+.skip {
+  font-size:12px; color:#ccc; background:none; border:none;
+  font-family:'Inter',sans-serif; cursor:pointer;
+  transition:color 0.2s; padding:0;
+}
+.skip:hover { color:#999; }
 
-  .option-text {
-    font-size: 15px;
-    font-weight: 500;
-    color: #1a1a1a;
-    position: relative;
-    z-index: 1;
-    line-height: 1.4;
-  }
-  .option-sub {
-    font-size: 12px;
-    color: #999;
-    margin-top: 2px;
-    font-weight: 400;
-  }
-  .option-emoji {
-    font-size: 20px;
-    margin-left: auto;
-    position: relative;
-    z-index: 1;
-  }
+/* ══════════════════════════════
+   V1 — MAP
+══════════════════════════════ */
+.map-block {
+  display:flex; gap:16px; align-items:stretch;
+  margin-bottom:28px;
+}
 
-  /* 2-COL GRID OPTIONS */
-  .options-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  .options-grid .option { flex-direction: column; align-items: flex-start; padding: 20px; gap: 10px; }
-  .options-grid .option-emoji { margin-left: 0; font-size: 24px; }
-  .options-grid .option-text { font-size: 14px; }
+/* compact Brazil map card */
+.map-card {
+  flex:0 0 auto;
+  width:150px; height:160px;
+  background:#f0f5ff;
+  border:1px solid #dde8ff;
+  border-radius:14px;
+  display:flex; align-items:center; justify-content:center;
+  position:relative; overflow:hidden;
+}
+.map-card svg { width:110px; height:auto; }
 
-  /* ─── INPUT FIELDS ─── */
-  .input-wrap { position: relative; margin-bottom: 8px; }
-  .input-wrap input {
-    width: 100%;
-    border: none;
-    border-bottom: 2px solid #e0e0e0;
-    padding: 14px 0;
-    font-size: 22px;
-    font-weight: 600;
-    color: #0a0a0a;
-    font-family: 'Inter', sans-serif;
-    outline: none;
-    background: transparent;
-    transition: border-color 0.2s;
-  }
-  .input-wrap input:focus { border-color: #1a56db; }
-  .input-wrap input::placeholder { color: #ccc; font-weight: 400; font-size: 20px; }
+/* stat pills column */
+.map-stats-col {
+  flex:1;
+  display:grid; grid-template-columns:1fr 1fr; gap:8px;
+  align-content:start;
+}
+.mstat {
+  background:#f7f9ff;
+  border:1px solid #eaefff;
+  border-radius:10px;
+  padding:12px 14px;
+}
+.mstat-num {
+  font-size:22px; font-weight:900; color:#1a56db;
+  letter-spacing:-0.02em; line-height:1; margin-bottom:3px;
+}
+.mstat-lbl { font-size:10px; color:#aaa; font-weight:500; line-height:1.3; }
 
-  .input-hint {
-    font-size: 12px;
-    color: #aaa;
-    margin-top: 6px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .input-hint kbd {
-    background: #f0f0f0;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 1px 6px;
-    font-size: 10px;
-    font-family: 'Inter', sans-serif;
-    color: #666;
-  }
+/* city dot animation in SVG */
+@keyframes dot-pulse {
+  0%,100%{ r:3; opacity:0.9; }
+  50%{ r:4.5; opacity:0.5; }
+}
+@keyframes dot-ring {
+  0%{ r:6; opacity:0.4; }
+  100%{ r:14; opacity:0; }
+}
+.city-dot { animation:dot-pulse 2s ease-in-out infinite; }
+.city-ring { animation:dot-ring 2s ease-out infinite; }
 
-  .field-error {
-    font-size: 12px;
-    color: #e53e3e;
-    margin-top: 6px;
-    display: none;
-  }
-  .field-error.show { display: block; }
+/* ══════════════════════════════
+   V2 — PORTFOLIO SCROLL
+══════════════════════════════ */
+.scroll-wrap {
+  width:calc(100% + 56px); margin-left:-28px;
+  overflow:hidden; position:relative;
+  margin-bottom:10px;
+}
+.scroll-wrap::before,
+.scroll-wrap::after {
+  content:''; position:absolute; top:0; bottom:0; width:40px; z-index:2;
+  pointer-events:none;
+}
+.scroll-wrap::before { left:0;  background:linear-gradient(90deg,#fff,transparent); }
+.scroll-wrap::after  { right:0; background:linear-gradient(-90deg,#fff,transparent); }
 
-  /* ─── BUTTON ─── */
-  .btn-continue {
-    margin-top: 28px;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    background: #1a56db;
-    color: white;
-    border: none;
-    padding: 16px 32px;
-    font-family: 'Inter', sans-serif;
-    font-weight: 700;
-    font-size: 14px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 0.01em;
-  }
-  .btn-continue:hover { background: #1544b8; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(26,86,219,0.25); }
-  .btn-continue:active { transform: translateY(0); }
+.scroll-track {
+  display:flex; gap:10px; width:max-content;
+  animation:scroll-fwd 20s linear infinite;
+  padding:4px 28px;
+}
+.scroll-track.rev { animation:scroll-rev 26s linear infinite; }
 
-  .btn-arrow { font-size: 18px; transition: transform 0.2s; }
-  .btn-continue:hover .btn-arrow { transform: translateX(4px); }
+@keyframes scroll-fwd { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+@keyframes scroll-rev { from{transform:translateX(-50%)} to{transform:translateX(0)} }
 
-  /* ─── NAV BOTTOM ─── */
-  .nav-bottom {
-    position: fixed;
-    bottom: 32px; left: 0; right: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    z-index: 100;
-  }
+.scard {
+  flex-shrink:0; width:148px; height:90px;
+  border-radius:10px;
+  border:1px solid #eee;
+  background:#fff;
+  padding:12px 14px;
+  display:flex; flex-direction:column; justify-content:flex-end;
+  position:relative; overflow:hidden;
+}
+.scard-accent {
+  position:absolute; top:0; left:0; right:0; height:2px;
+}
+.scard-result {
+  position:absolute; top:10px; right:10px;
+  background:#eff6ff; border-radius:100px;
+  font-size:8px; font-weight:700; color:#1a56db;
+  padding:2px 7px; letter-spacing:0.04em;
+}
+.scard-name { font-size:11px; font-weight:700; color:#0a0a0a; line-height:1.3; }
+.scard-niche { font-size:9px; color:#aaa; margin-top:2px; font-weight:500; }
 
-  .btn-back {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: transparent;
-    border: 1.5px solid #e0e0e0;
-    color: #888;
-    padding: 10px 20px;
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-back:hover { border-color: #bbb; color: #555; }
-  .btn-back.hidden { opacity: 0; pointer-events: none; }
+/* nicho accent colors */
+.a-blue   { background:#3b82f6; }
+.a-purple { background:#8b5cf6; }
+.a-green  { background:#10b981; }
+.a-amber  { background:#f59e0b; }
+.a-red    { background:#ef4444; }
+.a-cyan   { background:#06b6d4; }
+.a-orange { background:#f97316; }
+.a-lime   { background:#84cc16; }
 
-  /* ─── XP / SCORE ─── */
-  .xp-bar {
-    position: fixed;
-    bottom: 32px; right: 40px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    z-index: 100;
-  }
-  .xp-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: #1a56db;
-    letter-spacing: 0.08em;
-  }
-  .xp-dots { display: flex; gap: 5px; }
-  .xp-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: #e8e8e8;
-    transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
-  }
-  .xp-dot.filled { background: #1a56db; transform: scale(1.2); }
+/* client count row */
+.client-row {
+  display:flex; gap:8px; margin-bottom:28px; margin-top:8px;
+}
+.cstat {
+  flex:1; background:#f7f9ff;
+  border:1px solid #eaefff; border-radius:10px;
+  padding:14px 12px; text-align:center;
+}
+.cstat-num { font-size:20px; font-weight:900; color:#1a56db; letter-spacing:-0.02em; line-height:1; margin-bottom:3px; }
+.cstat-lbl { font-size:10px; color:#aaa; line-height:1.3; }
 
-  /* ─── SUCCESS SCREEN ─── */
-  .success-wrap { text-align: center; }
-  .success-icon {
-    width: 72px; height: 72px;
-    background: #eff6ff;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 30px;
-    margin: 0 auto 28px;
-    animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-  @keyframes popIn {
-    from { transform: scale(0); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
-  .success-title {
-    font-size: 38px;
-    font-weight: 900;
-    letter-spacing: -0.03em;
-    margin-bottom: 12px;
-    color: #0a0a0a;
-  }
-  .success-title .blue { color: #1a56db; }
-  .success-sub {
-    font-size: 16px;
-    color: #666;
-    line-height: 1.6;
-    max-width: 420px;
-    margin: 0 auto 40px;
-  }
-  .success-card {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    background: #0a0a0a;
-    color: white;
-    padding: 16px 28px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 32px;
-  }
-  .success-card .dot { width: 8px; height: 8px; background: #4ade80; border-radius: 50%; animation: blink 1.5s infinite; }
+/* ══════════════════════════════
+   V3 — NUMBERS
+══════════════════════════════ */
+.num-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:10px; margin-bottom:20px;
+}
+.ncard {
+  background:#f7f9ff;
+  border:1px solid #eaefff;
+  border-radius:12px; padding:18px 16px;
+  position:relative;
+}
+.ncard-top {
+  position:absolute; top:0; left:16px; right:16px; height:2px;
+  background:linear-gradient(90deg,#1a56db,#60a5fa);
+  border-radius:0 0 2px 2px; opacity:0;
+  transition:opacity 0.3s;
+}
+.ncard:hover .ncard-top { opacity:1; }
+.ncard-icon { font-size:18px; margin-bottom:10px; }
+.ncard-val  {
+  font-size:clamp(22px,5vw,30px); font-weight:900; color:#0a0a0a;
+  letter-spacing:-0.025em; line-height:1; margin-bottom:4px;
+}
+.ncard-val .blue { color:#1a56db; }
+.ncard-lbl { font-size:11px; color:#999; line-height:1.4; }
+.ncard-badge {
+  position:absolute; top:12px; right:12px;
+  background:#eff6ff; border-radius:100px;
+  font-size:8px; font-weight:700; color:#1a56db;
+  padding:2px 7px; letter-spacing:0.04em;
+}
 
-  .xp-final {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 20px;
-  }
-  .xp-final-dots { display: flex; gap: 5px; }
-  .xp-final-dot {
-    width: 10px; height: 10px;
-    background: #1a56db;
-    border-radius: 50%;
-    animation: fillPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
-  }
-  .xp-final-dot:nth-child(1) { animation-delay: 0.1s; }
-  .xp-final-dot:nth-child(2) { animation-delay: 0.2s; }
-  .xp-final-dot:nth-child(3) { animation-delay: 0.3s; }
-  .xp-final-dot:nth-child(4) { animation-delay: 0.4s; }
-  .xp-final-dot:nth-child(5) { animation-delay: 0.5s; }
-  .xp-final-dot:nth-child(6) { animation-delay: 0.6s; }
-  .xp-final-dot:nth-child(7) { animation-delay: 0.7s; }
-  .xp-final-dot:nth-child(8) { animation-delay: 0.8s; }
-  @keyframes fillPop {
-    from { transform: scale(0); opacity: 0; background: #e8e8e8; }
-    to { transform: scale(1); opacity: 1; background: #1a56db; }
-  }
-  .xp-final-label { font-size: 12px; font-weight: 700; color: #1a56db; letter-spacing: 0.08em; }
+.callout {
+  display:flex; align-items:flex-start; gap:12px;
+  padding:14px 16px;
+  background:#f7f9ff; border:1px solid #eaefff;
+  border-radius:10px; margin-bottom:24px;
+}
+.callout-icon { font-size:16px; margin-top:1px; flex-shrink:0; }
+.callout-text { font-size:13px; color:#666; line-height:1.55; }
+.callout-text strong { color:#0a0a0a; }
 
-  /* ─── TRANSITION FLASH ─── */
-  .flash {
-    position: fixed;
-    inset: 0;
-    background: #1a56db;
-    opacity: 0;
-    pointer-events: none;
-    z-index: 200;
-    transition: opacity 0.15s;
-  }
+/* ══════════════════════════════
+   QUESTION SCREENS
+══════════════════════════════ */
+.q-num {
+  font-size:11px; font-weight:700; letter-spacing:0.1em;
+  color:#1a56db; text-transform:uppercase;
+  margin-bottom:14px;
+  display:flex; align-items:center; gap:6px;
+}
+.q-num::after { content:''; height:1px; width:28px; background:#1a56db; opacity:0.35; }
 
-  @media (max-width: 600px) {
-    .logo { left: 20px; top: 20px; }
-    .step-counter { right: 20px; top: 20px; }
-    .screen { padding: 80px 24px; }
-    .options-grid { grid-template-columns: 1fr; }
-    .welcome-meta { flex-wrap: wrap; gap: 16px; }
-    .xp-bar { right: 20px; }
-  }
+.q-title {
+  font-size:clamp(24px,5vw,34px); font-weight:800;
+  line-height:1.14; letter-spacing:-0.025em;
+  color:#0a0a0a; margin-bottom:8px;
+}
+.q-sub { font-size:14px; color:#999; margin-bottom:26px; line-height:1.5; }
+
+/* options */
+.options { display:flex; flex-direction:column; gap:8px; }
+.option {
+  display:flex; align-items:center; gap:14px;
+  padding:13px 16px;
+  border:1.5px solid #ebebeb;
+  background:#fff; cursor:pointer;
+  border-radius:10px;
+  transition:all 0.15s ease;
+  user-select:none; position:relative; overflow:hidden;
+}
+.option::before {
+  content:''; position:absolute; left:0; top:0; bottom:0; width:0;
+  background:#eff6ff; transition:width 0.25s ease; z-index:0;
+}
+.option:hover { border-color:#1a56db; }
+.option:hover::before { width:100%; }
+.option.selected { border-color:#1a56db; background:#eff6ff; }
+
+.okey {
+  width:26px; height:26px;
+  border:1.5px solid #e0e0e0; border-radius:6px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:10px; font-weight:700; color:#bbb;
+  flex-shrink:0; transition:all 0.15s; position:relative; z-index:1;
+}
+.option:hover .okey, .option.selected .okey {
+  border-color:#1a56db; color:#1a56db; background:#fff;
+}
+.otext {
+  font-size:14px; font-weight:500; color:#1a1a1a;
+  position:relative; z-index:1; line-height:1.35;
+}
+.osub { font-size:11px; color:#bbb; margin-top:1px; font-weight:400; }
+
+.options-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:8px;
+}
+.options-grid .option {
+  flex-direction:column; align-items:flex-start; padding:16px; gap:8px;
+}
+.oemoji { font-size:20px; }
+.options-grid .otext { font-size:13px; }
+
+/* input */
+.input-wrap { margin-bottom:6px; }
+.input-wrap input {
+  width:100%; border:none; border-bottom:2px solid #e8e8e8;
+  padding:12px 0; font-size:20px; font-weight:600;
+  color:#0a0a0a; font-family:'Inter',sans-serif;
+  outline:none; background:transparent; transition:border-color 0.2s;
+}
+.input-wrap input:focus { border-color:#1a56db; }
+.input-wrap input::placeholder { color:#ddd; font-weight:400; font-size:18px; }
+
+.hint {
+  font-size:11px; color:#ccc; margin-top:5px;
+  display:flex; align-items:center; gap:5px;
+}
+.hint kbd {
+  background:#f5f5f5; border:1px solid #e8e8e8;
+  border-radius:4px; padding:1px 5px;
+  font-size:9px; font-family:'Inter',sans-serif; color:#888;
+}
+
+.ferr { font-size:11px; color:#e53e3e; margin-top:5px; display:none; }
+.ferr.show { display:block; }
+
+/* ── BOTTOM NAV ── */
+.nav-bot {
+  position:fixed; bottom:24px; left:0; right:0;
+  display:flex; align-items:center; justify-content:center;
+  z-index:200;
+}
+.btn-back {
+  display:flex; align-items:center; gap:5px;
+  background:transparent; border:1.5px solid #eee;
+  color:#ccc; padding:9px 18px;
+  font-family:'Inter',sans-serif; font-size:12px; font-weight:500;
+  border-radius:8px; cursor:pointer; transition:all 0.2s;
+}
+.btn-back:hover { border-color:#ddd; color:#888; }
+.btn-back.gone { opacity:0; pointer-events:none; }
+
+/* ── XP BAR ── */
+.xp-bar {
+  position:fixed; bottom:26px; right:28px;
+  display:none; align-items:center; gap:7px; z-index:200;
+}
+.xp-lbl { font-size:10px; font-weight:700; color:#1a56db; letter-spacing:0.08em; }
+.xp-dots { display:flex; gap:4px; }
+.xp-dot {
+  width:7px; height:7px; border-radius:50%; background:#e8e8e8;
+  transition:all 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+.xp-dot.on { background:#1a56db; transform:scale(1.25); }
+
+/* ══════════════════════════════
+   SUCCESS
+══════════════════════════════ */
+.success-ico {
+  width:64px; height:64px; background:#eff6ff;
+  border-radius:50%; display:flex; align-items:center;
+  justify-content:center; font-size:26px;
+  margin:0 auto 22px;
+  animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes popIn { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+
+.success-h {
+  font-size:36px; font-weight:900; letter-spacing:-0.03em;
+  margin-bottom:10px; color:#0a0a0a; text-align:center;
+}
+.success-h .blue { color:#1a56db; }
+.success-p {
+  font-size:15px; color:#666; line-height:1.65;
+  max-width:360px; margin:0 auto 28px; text-align:center;
+}
+.success-pill {
+  display:inline-flex; align-items:center; gap:10px;
+  background:#0a0a0a; color:#fff;
+  padding:13px 22px; border-radius:10px;
+  font-size:13px; font-weight:600; margin-bottom:24px;
+}
+.s-dot { width:7px; height:7px; background:#4ade80; border-radius:50%; animation:blink 1.5s infinite; }
+
+.xp-final { display:flex; align-items:center; justify-content:center; gap:7px; }
+.xpf-dots { display:flex; gap:4px; }
+.xpf-dot {
+  width:9px; height:9px; background:#1a56db; border-radius:50%;
+  animation:popIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.xpf-dot:nth-child(1){animation-delay:.05s} .xpf-dot:nth-child(2){animation-delay:.1s}
+.xpf-dot:nth-child(3){animation-delay:.15s} .xpf-dot:nth-child(4){animation-delay:.2s}
+.xpf-dot:nth-child(5){animation-delay:.25s} .xpf-dot:nth-child(6){animation-delay:.3s}
+.xpf-dot:nth-child(7){animation-delay:.35s} .xpf-dot:nth-child(8){animation-delay:.4s}
+.xpf-lbl { font-size:11px; font-weight:700; color:#1a56db; letter-spacing:0.08em; }
+
+/* ── MOBILE ── */
+@media(max-width:480px){
+  .options-grid { grid-template-columns:1fr; }
+  .num-grid { grid-template-columns:1fr; }
+  .map-block { flex-direction:column; }
+  .map-card { width:100%; height:120px; }
+  .map-card svg { width:85px; }
+  .map-stats-col { grid-template-columns:repeat(4,1fr); }
+}
 </style>
 </head>
 <body>
 
-<div class="progress-bar" id="progressBar" style="width:0%"></div>
-<div class="flash" id="flash"></div>
+<div class="progress-bar" id="pbar" style="width:0%"></div>
+<div class="logo" id="logo">ZENITH<span>.</span></div>
+<div class="step-counter" id="sctr"></div>
 
-<div class="logo">ZENITH<span>.</span></div>
-<div class="step-counter" id="stepCounter"></div>
+<div class="quiz-wrap">
 
-<div class="quiz-container">
-
-  <!-- ══════════════════════════════ -->
-  <!-- SCREEN 0 — WELCOME -->
-  <!-- ══════════════════════════════ -->
-  <div class="screen active" id="screen-0">
-    <div class="screen-inner">
-      <div class="welcome-tag">Diagnóstico gratuito · 2 minutos</div>
-      <h1 class="welcome-title">Pronto pra<br>escalar com<br><span class="blue">tráfego pago?</span></h1>
-      <p class="welcome-sub">Responda 8 perguntas rápidas e descubra o potencial do seu negócio. Nossa equipe fará uma análise personalizada e entra em contato em até 24h.</p>
-      <div class="welcome-meta">
-        <div class="meta-item">
-          <span class="meta-val">8</span>
-          <span class="meta-label">Perguntas</span>
-        </div>
-        <div class="meta-sep"></div>
-        <div class="meta-item">
-          <span class="meta-val">2min</span>
-          <span class="meta-label">Tempo médio</span>
-        </div>
-        <div class="meta-sep"></div>
-        <div class="meta-item">
-          <span class="meta-val">100%</span>
-          <span class="meta-label">Gratuito</span>
-        </div>
-        <div class="meta-sep"></div>
-        <div class="meta-item">
-          <span class="meta-val">24h</span>
-          <span class="meta-label">Retorno</span>
-        </div>
-      </div>
-      <button class="btn-continue" onclick="goTo(1)">
-        Começar agora
-        <span class="btn-arrow">→</span>
-      </button>
+<!-- ════════════════════════════
+     S0 · WELCOME
+════════════════════════════ -->
+<div class="screen active" id="s0">
+  <div class="inner">
+    <div class="tag">Diagnóstico gratuito · 2 minutos</div>
+    <h1 class="welcome-h">Pronto pra<br>escalar com<br><span class="blue">tráfego pago?</span></h1>
+    <p class="welcome-p">Responda 8 perguntas rápidas. Nossa equipe monta uma estratégia personalizada e entra em contato em até 24h.</p>
+    <div class="welcome-pills">
+      <div class="pill"><div class="pill-dot"></div>8 perguntas</div>
+      <div class="pill"><div class="pill-dot"></div>~2 minutos</div>
+      <div class="pill"><div class="pill-dot"></div>100% gratuito</div>
+      <div class="pill"><div class="pill-dot"></div>Retorno em 24h</div>
     </div>
+    <button class="btn-main" onclick="go('v1')">Vamos começar <span class="arrow">→</span></button>
   </div>
-
-  <!-- ══════════════════════════════ -->
-  <!-- SCREEN 1 — NOME -->
-  <!-- ══════════════════════════════ -->
-  <div class="screen" id="screen-1">
-    <div class="screen-inner">
-      <div class="q-number">01</div>
-      <h2 class="q-title">Como podemos te chamar?</h2>
-      <p class="q-sub">Seu primeiro nome já basta.</p>
-      <div class="input-wrap">
-        <input type="text" id="nome" placeholder="Digite seu nome..." autocomplete="off" onkeydown="if(event.key==='Enter') nextFromInput('nome','err-nome')">
-      </div>
-      <span class="field-error" id="err-nome">Por favor, informe seu nome.</span>
-      <div class="input-hint">Pressione <kbd>Enter</kbd> para continuar</div>
-      <br>
-      <button class="btn-continue" onclick="nextFromInput('nome','err-nome')">
-        Continuar <span class="btn-arrow">→</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════ -->
-  <!-- SCREEN 2 — SEGMENTO -->
-  <!-- ══════════════════════════════ -->
-  <div class="screen" id="screen-2">
-    <div class="screen-inner">
-      <div class="q-number">02</div>
-      <h2 class="q-title" id="q2-title">Qual é o seu segmento?</h2>
-      <p class="q-sub">Escolha o que melhor descreve o seu negócio.</p>
-      <div class="options-grid" id="nicho-options">
-        <div class="option" onclick="selectOption(this,'nicho','E-commerce')">
-          <div class="option-emoji">🛒</div>
-          <div class="option-text">E-commerce</div>
-        </div>
-        <div class="option" onclick="selectOption(this,'nicho','Infoproduto')">
-          <div class="option-emoji">🎓</div>
-          <div class="option-text">Infoproduto</div>
-        </div>
-        <div class="option" onclick="selectOption(this,'nicho','Saúde & Clínicas')">
-          <div class="option-emoji">🏥</div>
-          <div class="option-text">Saúde & Clínicas</div>
-        </div>
-        <div class="option" onclick="selectOption(this,'nicho','Advocacia / Jurídico')">
-          <div class="option-emoji">⚖️</div>
-          <div class="option-text">Advocacia</div>
-        </div>
-        <div class="option" onclick="selectOption(this,'nicho','Imóveis')">
-          <div class="option-emoji">🏠</div>
-          <div class="option-text">Imóveis</div>
-        </div>
-        <div class="option" onclick="selectOption(this,'nicho','B2B / Serviços')">
-          <div class="option-emoji">🤝</div>
-          <div class="option-text">B2B / Serviços</div>
-        </div>
-        <div class="option" onclick="selectOption(this,'nicho','Importação')">
-          <div class="option-emoji">📦</div>
-          <div class="option-text">Importação</div>
-        </div>
-        <div class="option" onclick="selectOption(this,'nicho','Outro')">
-          <div class="option-emoji">💡</div>
-          <div class="option-text">Outro</div>
-        </div>
-      </div>
-      <span class="field-error" id="err-nicho">Selecione uma opção para continuar.</span>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════ -->
-  <!-- SCREEN 3 — FATURAMENTO -->
-  <!-- ══════════════════════════════ -->
-  <div class="screen" id="screen-3">
-    <div class="screen-inner">
-      <div class="q-number">03</div>
-      <h2 class="q-title">Qual é o seu faturamento mensal?</h2>
-      <p class="q-sub">Não precisa ser exato. Uma faixa já nos ajuda muito.</p>
-      <div class="options" id="faturamento-options">
-        <div class="option" onclick="selectOption(this,'faturamento','Até R$10.000')">
-          <div class="option-key">A</div>
-          <div><div class="option-text">Até R$10.000</div></div>
-        </div>
-        <div class="option" onclick="selectOption(this,'faturamento','R$10K – R$30K')">
-          <div class="option-key">B</div>
-          <div><div class="option-text">Entre R$10.000 e R$30.000</div></div>
-        </div>
-        <div class="option" onclick="selectOption(this,'faturamento','R$30K – R$100K')">
-          <div class="option-key">C</div>
-          <div><div class="option-text">Entre R$30.000 e R$100.000</div></div>
-        </div>
-        <div class="option" onclick="selectOption(this,'faturamento','R$100K – R$300K')">
-          <div class="option-key">D</div>
-          <div><div class="option-text">Entre R$100.000 e R$300.000</div></div>
-        </div>
-        <div class="option" onclick="selectOption(this,'faturamento','Acima de R$300K')">
-          <div class="option-key">E</div>
-          <div><div class="option-text">Acima de R$300.000</div></div>
-        </div>
-      </div>
-      <span class="field-error" id="err-faturamento">Selecione uma opção.</span>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════ -->
-  <!-- SCREEN 4 — INVESTIMENTO -->
-  <!-- ══════════════════════════════ -->
-  <div class="screen" id="screen-4">
-    <div class="screen-inner">
-      <div class="q-number">04</div>
-      <h2 class="q-title">Quanto você pensa em investir em tráfego por mês?</h2>
-      <p class="q-sub">Esse valor é a verba de anúncio, não o valor da gestão.</p>
-      <div class="options" id="investimento-options">
-        <div class="option" onclick="selectOption(this,'investimento','Até R$1.000')">
-          <div class="option-key">A</div>
-          <div><div class="option-text">Até R$1.000</div><div class="option-sub">Ideal para quem está começando</div></div>
-        </div>
-        <div class="option" onclick="selectOption(this,'investimento','R$1K – R$3K')">
-          <div class="option-key">B</div>
-          <div><div class="option-text">Entre R$1.000 e R$3.000</div><div class="option-sub">Fase de validação</div></div>
-        </div>
-        <div class="option" onclick="selectOption(this,'investimento','R$3K – R$10K')">
-          <div class="option-key">C</div>
-          <div><div class="option-text">Entre R$3.000 e R$10.000</div><div class="option-sub">Escalada controlada</div></div>
-        </div>
-        <div class="option" onclick="selectOption(this,'investimento','R$10K – R$30K')">
-          <div class="option-key">D</div>
-          <div><div class="option-text">Entre R$10.000 e R$30.000</div><div class="option-sub">Alta performance</div></div>
-        </div>
-        <div class="option" onclick="selectOption(this,'investimento','Acima de R$30K')">
-          <div class="option-key">E</div>
-          <div><div class="option-text">Acima de R$30.000</div><div class="option-sub">Máxima escala</div></div>
-        </div>
-      </div>
-      <span class="field-error" id="err-investimento">Selecione uma opção.</span>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════ -->
-  <!-- SCREEN 5 — EXPERIÊNCIA -->
-  <!-- ══════════════════════════════ -->
-  <div class="screen" id="screen-5">
-    <div class="screen-inner">
-      <div class="q-number">05</div>
-      <h2 class="q-title">Você já investiu em tráfego pago antes?</h2>
-      <p class="q-sub">Seja honesto — isso ajuda a montar a melhor estratégia para você.</p>
-      <div class="options" id="trafego-options">
-        <div class="option" onclick="selectOption(this,'trafego','Nunca investi — é minha primeira vez')">
-          <div class="option-key">A</div>
-          <div><div class="option-text">Nunca investi — é minha primeira vez</div></div>
-        </div>
-        <div class="option" onclick="selectOption(this,'trafego','Já tentei, mas não tive resultado')">
-          <div class="option-key">B</div>
-          <div><div class="option-text">Já tentei, mas não tive resultado</div></div>
-        </div>
-        <div class="option" onclick="selectOption(this,'trafego','Invisto sozinho e quero melhorar')">
-          <div class="option-key">C</div>
-          <div><div class="option-text">Invisto sozinho e quero melhorar</div></div>
-        </div>
-        <div class="option" onclick="selectOption(this,'trafego','Tenho outra agência e quero trocar')">
-          <div class="option-key">D</div>
-          <div><div class="option-text">Tenho outra agência e quero trocar</div></div>
-        </div>
-      </div>
-      <span class="field-error" id="err-trafego">Selecione uma opção.</span>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════ -->
-  <!-- SCREEN 6 — DESAFIO -->
-  <!-- ══════════════════════════════ -->
-  <div class="screen" id="screen-6">
-    <div class="screen-inner">
-      <div class="q-number">06</div>
-      <h2 class="q-title">Qual é a sua maior dificuldade hoje?</h2>
-      <p class="q-sub">Selecione o que mais te trava no momento.</p>
-      <div class="options" id="desafio-options">
-        <div class="option" onclick="selectOption(this,'desafio','Não gero leads suficientes')">
-          <div class="option-key">A</div>
-          <div><div class="option-text">Não gero leads suficientes</div></div>
-        </div>
-        <div class="option" onclick="selectOption(this,'desafio','Gero leads mas não converto em vendas')">
-          <div class="option-key">B</div>
-          <div><div class="option-text">Gero leads mas não converto em vendas</div></div>
-        </div>
-        <div class="option" onclick="selectOption(this,'desafio','Meu custo por aquisição está alto demais')">
-          <div class="option-key">C</div>
-          <div><div class="option-text">Meu custo por aquisição está alto demais</div></div>
-        </div>
-        <div class="option" onclick="selectOption(this,'desafio','Não consigo escalar de forma consistente')">
-          <div class="option-key">D</div>
-          <div><div class="option-text">Não consigo escalar de forma consistente</div></div>
-        </div>
-        <div class="option" onclick="selectOption(this,'desafio','Não tenho presença digital estruturada')">
-          <div class="option-key">E</div>
-          <div><div class="option-text">Não tenho presença digital estruturada</div></div>
-        </div>
-      </div>
-      <span class="field-error" id="err-desafio">Selecione uma opção.</span>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════ -->
-  <!-- SCREEN 7 — EMAIL -->
-  <!-- ══════════════════════════════ -->
-  <div class="screen" id="screen-7">
-    <div class="screen-inner">
-      <div class="q-number">07</div>
-      <h2 class="q-title">Qual é o seu melhor e-mail?</h2>
-      <p class="q-sub">Vamos enviar um resumo da sua análise por aqui.</p>
-      <div class="input-wrap">
-        <input type="email" id="email" placeholder="seu@email.com" autocomplete="off" onkeydown="if(event.key==='Enter') nextFromInput('email','err-email',true)">
-      </div>
-      <span class="field-error" id="err-email">Insira um e-mail válido.</span>
-      <div class="input-hint">Pressione <kbd>Enter</kbd> para continuar</div>
-      <br>
-      <button class="btn-continue" onclick="nextFromInput('email','err-email',true)">
-        Continuar <span class="btn-arrow">→</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════ -->
-  <!-- SCREEN 8 — WHATSAPP -->
-  <!-- ══════════════════════════════ -->
-  <div class="screen" id="screen-8">
-    <div class="screen-inner">
-      <div class="q-number">08</div>
-      <h2 class="q-title">E o seu WhatsApp?</h2>
-      <p class="q-sub">Última etapa! Nossa equipe vai entrar em contato em até 24h.</p>
-      <div class="input-wrap">
-        <input type="tel" id="telefone" placeholder="(00) 00000-0000" autocomplete="off" onkeydown="if(event.key==='Enter') submitQuiz()" oninput="maskPhone(this)">
-      </div>
-      <span class="field-error" id="err-telefone">Insira um WhatsApp válido.</span>
-      <div class="input-hint">Pressione <kbd>Enter</kbd> para enviar</div>
-      <br>
-      <button class="btn-continue" onclick="submitQuiz()">
-        Enviar diagnóstico <span class="btn-arrow">→</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════ -->
-  <!-- SCREEN 9 — SUCCESS -->
-  <!-- ══════════════════════════════ -->
-  <div class="screen" id="screen-9">
-    <div class="screen-inner">
-      <div class="success-wrap">
-        <div class="success-icon">✅</div>
-        <h2 class="success-title">Tudo <span class="blue">certo!</span></h2>
-        <p class="success-sub">Seus dados chegaram com sucesso. Um estrategista da Zenith vai analisar seu perfil e entrar em contato no seu WhatsApp em até <strong>24 horas</strong>.</p>
-        <div class="success-card">
-          <div class="dot"></div>
-          <span id="success-name">Olá!</span> — aguarde o contato da Zenith 👋
-        </div>
-        <p style="font-size:13px; color:#aaa; margin-bottom: 16px;">Progresso completo</p>
-        <div class="xp-final">
-          <div class="xp-final-dots">
-            <div class="xp-final-dot"></div>
-            <div class="xp-final-dot"></div>
-            <div class="xp-final-dot"></div>
-            <div class="xp-final-dot"></div>
-            <div class="xp-final-dot"></div>
-            <div class="xp-final-dot"></div>
-            <div class="xp-final-dot"></div>
-            <div class="xp-final-dot"></div>
-          </div>
-          <span class="xp-final-label">8 / 8 ETAPAS</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-</div><!-- end quiz-container -->
-
-<!-- NAV BOTTOM -->
-<div class="nav-bottom" id="navBottom">
-  <button class="btn-back hidden" id="btnBack" onclick="goBack()">← Voltar</button>
 </div>
 
-<!-- XP BAR -->
-<div class="xp-bar" id="xpBar" style="display:none">
-  <span class="xp-label">PROGRESSO</span>
-  <div class="xp-dots" id="xpDots"></div>
+<!-- ════════════════════════════
+     V1 · PRESENÇA NACIONAL
+════════════════════════════ -->
+<div class="screen" id="sv1">
+  <div class="inner">
+    <div class="v-tag">Presença nacional</div>
+    <h2 class="v-h">A empresa que você está<br>prestes a contratar<br><span class="blue">já atende o Brasil.</span></h2>
+    <p class="v-p">De Santa Catarina ao Ceará — clientes reais em 16 estados e mais de 26 cidades.</p>
+
+    <div class="map-block">
+      <!-- Compact Brazil SVG map -->
+      <div class="map-card">
+        <svg viewBox="0 0 460 560" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Brazil border - projected from real geographic coordinates -->
+          <path d="M400,143 L382,153 L366,147 L350,133 L323,122 L297,116
+            L280,102 L253,96 L242,99 L226,89 L209,62 L182,55
+            L161,57 L144,62 L123,57 L117,55 L106,62 L85,66
+            L68,75 L52,79 L36,85 L19,89 L5,109 L5,137
+            L5,164 L5,205 L16,232 L37,260 L53,300
+            L70,328 L91,355 L118,376 L172,355
+            L205,362 L221,396 L221,423 L227,451
+            L221,478 L221,499 L237,519 L253,533
+            L275,519 L291,499 L318,478
+            L350,369 L361,349 L377,314
+            L371,273 L382,260 L393,232
+            L404,212 L415,191
+            L420,164 L422,143 Z"
+            fill="rgba(26,86,219,0.09)" stroke="rgba(26,86,219,0.35)" stroke-width="2.5" stroke-linejoin="round"/>
+
+          <!-- São Paulo -->
+          <circle class="city-ring" cx="274" cy="403" r="17" fill="none" stroke="#1a56db" stroke-width="2" opacity="0.35"/>
+          <circle class="city-dot" cx="274" cy="403" r="8" fill="#1a56db"/>
+
+          <!-- Rio de Janeiro -->
+          <circle class="city-ring" cx="311" cy="395" r="14" fill="none" stroke="#1a56db" stroke-width="2" opacity="0.28" style="animation-delay:0.4s"/>
+          <circle class="city-dot" cx="311" cy="395" r="6.5" fill="#3b82f6" style="animation-delay:0.4s"/>
+
+          <!-- Curitiba -->
+          <circle class="city-dot" cx="245" cy="429" r="6" fill="#1a56db" style="animation-delay:0.8s"/>
+
+          <!-- Porto Alegre -->
+          <circle class="city-dot" cx="224" cy="492" r="5.5" fill="#60a5fa" style="animation-delay:1.2s"/>
+
+          <!-- Belo Horizonte -->
+          <circle class="city-dot" cx="302" cy="354" r="6.5" fill="#1a56db" style="animation-delay:0.6s"/>
+
+          <!-- Salvador -->
+          <circle class="city-ring" cx="362" cy="260" r="13" fill="none" stroke="#1a56db" stroke-width="1.5" opacity="0.25" style="animation-delay:0.2s"/>
+          <circle class="city-dot" cx="362" cy="260" r="6" fill="#3b82f6" style="animation-delay:0.2s"/>
+
+          <!-- Recife -->
+          <circle class="city-dot" cx="400" cy="193" r="5.5" fill="#1a56db" style="animation-delay:1s"/>
+
+          <!-- Fortaleza -->
+          <circle class="city-dot" cx="362" cy="133" r="6" fill="#60a5fa" style="animation-delay:0.7s"/>
+
+          <!-- Brasília -->
+          <circle class="city-ring" cx="260" cy="298" r="15" fill="none" stroke="#1a56db" stroke-width="1.5" opacity="0.28" style="animation-delay:0.5s"/>
+          <circle class="city-dot" cx="260" cy="298" r="7.5" fill="#1a56db" style="animation-delay:0.5s"/>
+
+          <!-- Manaus -->
+          <circle class="city-dot" cx="129" cy="124" r="5.5" fill="#3b82f6" style="animation-delay:1.4s"/>
+
+          <!-- Florianópolis -->
+          <circle class="city-dot" cx="253" cy="459" r="5" fill="#1a56db" style="animation-delay:0.9s"/>
+
+          <!-- Campo Grande -->
+          <circle class="city-dot" cx="187" cy="362" r="5.5" fill="#60a5fa" style="animation-delay:1.1s"/>
+
+          <!-- Belém -->
+          <circle class="city-dot" cx="253" cy="102" r="5.5" fill="#3b82f6" style="animation-delay:1.3s"/>
+
+          <!-- Goiânia -->
+          <circle class="city-dot" cx="245" cy="310" r="5" fill="#1a56db" style="animation-delay:1.5s"/>
+
+          <!-- Natal -->
+          <circle class="city-dot" cx="398" cy="161" r="5" fill="#60a5fa" style="animation-delay:1.6s"/>
+        </svg>
+      </div>
+
+      <!-- Stats beside map -->
+      <div class="map-stats-col">
+        <div class="mstat">
+          <div class="mstat-num">16</div>
+          <div class="mstat-lbl">Estados atendidos</div>
+        </div>
+        <div class="mstat">
+          <div class="mstat-num">26+</div>
+          <div class="mstat-lbl">Cidades</div>
+        </div>
+        <div class="mstat">
+          <div class="mstat-num">103</div>
+          <div class="mstat-lbl">Clientes ativos</div>
+        </div>
+        <div class="mstat">
+          <div class="mstat-num">4</div>
+          <div class="mstat-lbl">Anos de mercado</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-main" onclick="go('v2')">Ver clientes <span class="arrow">→</span></button>
+      <button class="skip" onclick="go(1)">Pular</button>
+    </div>
+  </div>
 </div>
+
+<!-- ════════════════════════════
+     V2 · PORTFÓLIO
+════════════════════════════ -->
+<div class="screen" id="sv2">
+  <div class="inner">
+    <div class="v-tag">Portfólio</div>
+    <h2 class="v-h">103 empresas.<br><span class="blue">Resultados reais.</span><br><span class="muted">Nichos diversos.</span></h2>
+    <p class="v-p">E-commerce, infoproduto, saúde, advocacia, importação e muito mais.</p>
+
+    <!-- Row 1 -->
+    <div class="scroll-wrap">
+      <div class="scroll-track" id="t1">
+        <div class="scard"><div class="scard-accent a-amber"></div><div class="scard-result">ROAS 4.1x</div><div class="scard-name">Importação Apple</div><div class="scard-niche">R$369K · jan/2026</div></div>
+        <div class="scard"><div class="scard-accent a-purple"></div><div class="scard-result">ROAS 8.2x</div><div class="scard-name">Infoproduto</div><div class="scard-niche">R$3.5M em 1 mês</div></div>
+        <div class="scard"><div class="scard-accent a-blue"></div><div class="scard-result">+233%</div><div class="scard-name">E-commerce</div><div class="scard-niche">R$30K → R$100K/mês</div></div>
+        <div class="scard"><div class="scard-accent a-green"></div><div class="scard-result">CPL −62%</div><div class="scard-name">Clínica Estética</div><div class="scard-niche">+180 leads/mês</div></div>
+        <div class="scard"><div class="scard-accent a-red"></div><div class="scard-result">0→40 clientes</div><div class="scard-name">Advocacia</div><div class="scard-niche">40+ casos/mês</div></div>
+        <div class="scard"><div class="scard-accent a-cyan"></div><div class="scard-result">ROAS 3.8x</div><div class="scard-name">Imóveis</div><div class="scard-niche">Leads qualificados</div></div>
+        <div class="scard"><div class="scard-accent a-orange"></div><div class="scard-result">+312%</div><div class="scard-name">B2B / SaaS</div><div class="scard-niche">Demos agendadas</div></div>
+        <div class="scard"><div class="scard-accent a-lime"></div><div class="scard-result">3.2x pedidos</div><div class="scard-name">Food & Delivery</div><div class="scard-niche">Cupons + remarketing</div></div>
+        <!-- duplicate for loop -->
+        <div class="scard"><div class="scard-accent a-amber"></div><div class="scard-result">ROAS 4.1x</div><div class="scard-name">Importação Apple</div><div class="scard-niche">R$369K · jan/2026</div></div>
+        <div class="scard"><div class="scard-accent a-purple"></div><div class="scard-result">ROAS 8.2x</div><div class="scard-name">Infoproduto</div><div class="scard-niche">R$3.5M em 1 mês</div></div>
+        <div class="scard"><div class="scard-accent a-blue"></div><div class="scard-result">+233%</div><div class="scard-name">E-commerce</div><div class="scard-niche">R$30K → R$100K/mês</div></div>
+        <div class="scard"><div class="scard-accent a-green"></div><div class="scard-result">CPL −62%</div><div class="scard-name">Clínica Estética</div><div class="scard-niche">+180 leads/mês</div></div>
+        <div class="scard"><div class="scard-accent a-red"></div><div class="scard-result">0→40 clientes</div><div class="scard-name">Advocacia</div><div class="scard-niche">40+ casos/mês</div></div>
+        <div class="scard"><div class="scard-accent a-cyan"></div><div class="scard-result">ROAS 3.8x</div><div class="scard-name">Imóveis</div><div class="scard-niche">Leads qualificados</div></div>
+        <div class="scard"><div class="scard-accent a-orange"></div><div class="scard-result">+312%</div><div class="scard-name">B2B / SaaS</div><div class="scard-niche">Demos agendadas</div></div>
+        <div class="scard"><div class="scard-accent a-lime"></div><div class="scard-result">3.2x pedidos</div><div class="scard-name">Food & Delivery</div><div class="scard-niche">Cupons + remarketing</div></div>
+      </div>
+    </div>
+
+    <!-- Row 2 reverse -->
+    <div class="scroll-wrap">
+      <div class="scroll-track rev" id="t2">
+        <div class="scard"><div class="scard-accent a-cyan"></div><div class="scard-result">2.9x ROAS</div><div class="scard-name">Construtora SP</div><div class="scard-niche">Alto ticket</div></div>
+        <div class="scard"><div class="scard-accent a-green"></div><div class="scard-result">+95 consult.</div><div class="scard-name">Psicologia Online</div><div class="scard-niche">Meta Ads</div></div>
+        <div class="scard"><div class="scard-accent a-orange"></div><div class="scard-result">ROAS 5.1x</div><div class="scard-name">Segurança Eletr.</div><div class="scard-niche">Google Ads local</div></div>
+        <div class="scard"><div class="scard-accent a-purple"></div><div class="scard-result">R$100K/dia</div><div class="scard-name">Lançamento Digital</div><div class="scard-niche">Em 1 único dia</div></div>
+        <div class="scard"><div class="scard-accent a-amber"></div><div class="scard-result">49 vendas</div><div class="scard-name">Apple Premium</div><div class="scard-niche">Ticket R$7.5K</div></div>
+        <div class="scard"><div class="scard-accent a-red"></div><div class="scard-result">CPL R$18</div><div class="scard-name">Escritório Juríd.</div><div class="scard-niche">Leads premium</div></div>
+        <div class="scard"><div class="scard-accent a-blue"></div><div class="scard-result">R$321K</div><div class="scard-name">Varejo Online</div><div class="scard-niche">55 vendas/mês</div></div>
+        <div class="scard"><div class="scard-accent a-lime"></div><div class="scard-result">+280%</div><div class="scard-name">Restaurante</div><div class="scard-niche">Reservas digitais</div></div>
+        <!-- dup -->
+        <div class="scard"><div class="scard-accent a-cyan"></div><div class="scard-result">2.9x ROAS</div><div class="scard-name">Construtora SP</div><div class="scard-niche">Alto ticket</div></div>
+        <div class="scard"><div class="scard-accent a-green"></div><div class="scard-result">+95 consult.</div><div class="scard-name">Psicologia Online</div><div class="scard-niche">Meta Ads</div></div>
+        <div class="scard"><div class="scard-accent a-orange"></div><div class="scard-result">ROAS 5.1x</div><div class="scard-name">Segurança Eletr.</div><div class="scard-niche">Google Ads local</div></div>
+        <div class="scard"><div class="scard-accent a-purple"></div><div class="scard-result">R$100K/dia</div><div class="scard-name">Lançamento Digital</div><div class="scard-niche">Em 1 único dia</div></div>
+        <div class="scard"><div class="scard-accent a-amber"></div><div class="scard-result">49 vendas</div><div class="scard-name">Apple Premium</div><div class="scard-niche">Ticket R$7.5K</div></div>
+        <div class="scard"><div class="scard-accent a-red"></div><div class="scard-result">CPL R$18</div><div class="scard-name">Escritório Juríd.</div><div class="scard-niche">Leads premium</div></div>
+        <div class="scard"><div class="scard-accent a-blue"></div><div class="scard-result">R$321K</div><div class="scard-name">Varejo Online</div><div class="scard-niche">55 vendas/mês</div></div>
+        <div class="scard"><div class="scard-accent a-lime"></div><div class="scard-result">+280%</div><div class="scard-name">Restaurante</div><div class="scard-niche">Reservas digitais</div></div>
+      </div>
+    </div>
+
+    <div class="client-row">
+      <div class="cstat"><div class="cstat-num">103</div><div class="cstat-lbl">Empresas atendidas</div></div>
+      <div class="cstat"><div class="cstat-num">10+</div><div class="cstat-lbl">Nichos diferentes</div></div>
+      <div class="cstat"><div class="cstat-num">16</div><div class="cstat-lbl">Estados</div></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-main" onclick="go('v3')">Ver os números <span class="arrow">→</span></button>
+      <button class="skip" onclick="go(1)">Pular</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     V3 · NÚMEROS
+════════════════════════════ -->
+<div class="screen" id="sv3">
+  <div class="inner">
+    <div class="v-tag">Números que comprovam</div>
+    <h2 class="v-h">O que já foi feito<br>fala <span class="blue">mais alto</span><br><span class="muted">do que promessa.</span></h2>
+
+    <div class="num-grid">
+      <div class="ncard">
+        <div class="ncard-top"></div>
+        <div class="ncard-badge">Ads</div>
+        <div class="ncard-icon">📊</div>
+        <div class="ncard-val"><span class="blue">+</span><span class="cntup" data-t="30" data-s="M">30M</span></div>
+        <div class="ncard-lbl">Gerenciados em plataformas de tráfego</div>
+      </div>
+      <div class="ncard">
+        <div class="ncard-top"></div>
+        <div class="ncard-badge">Receita</div>
+        <div class="ncard-icon">💰</div>
+        <div class="ncard-val"><span class="blue">+</span><span class="cntup" data-t="132" data-s="M">132M</span></div>
+        <div class="ncard-lbl">Em receita gerada para clientes</div>
+      </div>
+      <div class="ncard">
+        <div class="ncard-top"></div>
+        <div class="ncard-badge">Portfólio</div>
+        <div class="ncard-icon">🤝</div>
+        <div class="ncard-val"><span class="cntup" data-t="103" data-s="">103</span></div>
+        <div class="ncard-lbl">Empresas atendidas no Brasil</div>
+      </div>
+      <div class="ncard">
+        <div class="ncard-top"></div>
+        <div class="ncard-badge">Recorde</div>
+        <div class="ncard-icon">🏆</div>
+        <div class="ncard-val">R$<span class="cntup" data-t="3.5" data-s="M">3.5M</span></div>
+        <div class="ncard-lbl">Faturados em um único mês</div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-icon">⚡</div>
+      <div class="callout-text"><strong>Você está a um passo disso.</strong> Responda 8 perguntas e nossa equipe monta uma estratégia personalizada para o seu negócio.</div>
+    </div>
+
+    <button class="btn-main" style="width:100%;justify-content:center;padding:16px" onclick="go(1)">
+      Quero meu diagnóstico <span class="arrow">→</span>
+    </button>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     Q1 · NOME
+════════════════════════════ -->
+<div class="screen" id="s1">
+  <div class="inner">
+    <div class="q-num">01</div>
+    <h2 class="q-title">Como podemos te chamar?</h2>
+    <p class="q-sub">Seu primeiro nome já basta.</p>
+    <div class="input-wrap">
+      <input type="text" id="nome" placeholder="Digite seu nome…" autocomplete="off"
+        onkeydown="if(event.key==='Enter')nfi('nome','e-nome')">
+    </div>
+    <span class="ferr" id="e-nome">Por favor, informe seu nome.</span>
+    <div class="hint">Pressione <kbd>Enter</kbd> para continuar</div><br>
+    <button class="btn-main" onclick="nfi('nome','e-nome')">Continuar <span class="arrow">→</span></button>
+  </div>
+</div>
+
+<!-- Q2 · SEGMENTO -->
+<div class="screen" id="s2">
+  <div class="inner">
+    <div class="q-num">02</div>
+    <h2 class="q-title" id="q2t">Qual é o seu segmento?</h2>
+    <p class="q-sub">Escolha o que melhor descreve seu negócio.</p>
+    <div class="options-grid">
+      <div class="option" onclick="sel(this,'nicho','E-commerce')"><div class="oemoji">🛒</div><div class="otext">E-commerce</div></div>
+      <div class="option" onclick="sel(this,'nicho','Infoproduto')"><div class="oemoji">🎓</div><div class="otext">Infoproduto</div></div>
+      <div class="option" onclick="sel(this,'nicho','Saúde & Clínicas')"><div class="oemoji">🏥</div><div class="otext">Saúde & Clínicas</div></div>
+      <div class="option" onclick="sel(this,'nicho','Advocacia')"><div class="oemoji">⚖️</div><div class="otext">Advocacia</div></div>
+      <div class="option" onclick="sel(this,'nicho','Imóveis')"><div class="oemoji">🏠</div><div class="otext">Imóveis</div></div>
+      <div class="option" onclick="sel(this,'nicho','B2B / Serviços')"><div class="oemoji">🤝</div><div class="otext">B2B / Serviços</div></div>
+      <div class="option" onclick="sel(this,'nicho','Importação')"><div class="oemoji">📦</div><div class="otext">Importação</div></div>
+      <div class="option" onclick="sel(this,'nicho','Outro')"><div class="oemoji">💡</div><div class="otext">Outro</div></div>
+    </div>
+    <span class="ferr" id="e-nicho">Selecione uma opção.</span>
+  </div>
+</div>
+
+<!-- Q3 · FATURAMENTO -->
+<div class="screen" id="s3">
+  <div class="inner">
+    <div class="q-num">03</div>
+    <h2 class="q-title">Qual é seu faturamento mensal?</h2>
+    <p class="q-sub">Uma faixa já nos ajuda bastante.</p>
+    <div class="options">
+      <div class="option" onclick="sel(this,'fat','Até R$10K')"><div class="okey">A</div><div class="otext">Até R$10.000</div></div>
+      <div class="option" onclick="sel(this,'fat','R$10K–30K')"><div class="okey">B</div><div class="otext">Entre R$10.000 e R$30.000</div></div>
+      <div class="option" onclick="sel(this,'fat','R$30K–100K')"><div class="okey">C</div><div class="otext">Entre R$30.000 e R$100.000</div></div>
+      <div class="option" onclick="sel(this,'fat','R$100K–300K')"><div class="okey">D</div><div class="otext">Entre R$100.000 e R$300.000</div></div>
+      <div class="option" onclick="sel(this,'fat','Acima de R$300K')"><div class="okey">E</div><div class="otext">Acima de R$300.000</div></div>
+    </div>
+    <span class="ferr" id="e-fat">Selecione uma opção.</span>
+  </div>
+</div>
+
+<!-- Q4 · INVESTIMENTO -->
+<div class="screen" id="s4">
+  <div class="inner">
+    <div class="q-num">04</div>
+    <h2 class="q-title">Se a gente estruturasse seus anúncios corretamente, qual nível de investimento você estaria disposto a sustentar para crescer?</h2>
+    <p class="q-sub">Verba de anúncio por mês, não o valor da gestão.</p>
+    <div class="options">
+      <div class="option" onclick="sel(this,'inv','Até R$1K')"><div class="okey">A</div><div><div class="otext">Até R$1.000</div><div class="osub">Ideal para começar</div></div></div>
+      <div class="option" onclick="sel(this,'inv','R$1K–3K')"><div class="okey">B</div><div><div class="otext">Entre R$1.000 e R$3.000</div><div class="osub">Fase de validação</div></div></div>
+      <div class="option" onclick="sel(this,'inv','R$3K–10K')"><div class="okey">C</div><div><div class="otext">Entre R$3.000 e R$10.000</div><div class="osub">Escalada controlada</div></div></div>
+      <div class="option" onclick="sel(this,'inv','R$10K–30K')"><div class="okey">D</div><div><div class="otext">Entre R$10.000 e R$30.000</div><div class="osub">Alta performance</div></div></div>
+      <div class="option" onclick="sel(this,'inv','Acima de R$30K')"><div class="okey">E</div><div><div class="otext">Acima de R$30.000</div><div class="osub">Máxima escala</div></div></div>
+    </div>
+    <span class="ferr" id="e-inv">Selecione uma opção.</span>
+  </div>
+</div>
+
+<!-- Q5 · EXPERIÊNCIA -->
+<div class="screen" id="s5">
+  <div class="inner">
+    <div class="q-num">05</div>
+    <h2 class="q-title">Você já investiu em tráfego pago antes?</h2>
+    <p class="q-sub">Seja honesto — isso molda toda a estratégia.</p>
+    <div class="options">
+      <div class="option" onclick="sel(this,'traf','Nunca investi')"><div class="okey">A</div><div class="otext">Nunca investi — é minha primeira vez</div></div>
+      <div class="option" onclick="sel(this,'traf','Tentei sem resultado')"><div class="okey">B</div><div class="otext">Já tentei, mas não tive resultado</div></div>
+      <div class="option" onclick="sel(this,'traf','Invisto sozinho')"><div class="okey">C</div><div class="otext">Invisto sozinho e quero melhorar</div></div>
+      <div class="option" onclick="sel(this,'traf','Tenho outra agência')"><div class="okey">D</div><div class="otext">Tenho outra agência e quero trocar</div></div>
+    </div>
+    <span class="ferr" id="e-traf">Selecione uma opção.</span>
+  </div>
+</div>
+
+<!-- Q6 · ONDE PERDE DINHEIRO -->
+<div class="screen" id="s6">
+  <div class="inner">
+    <div class="q-num">06</div>
+    <h2 class="q-title">Olhando para seus anúncios ou vendas, onde você sente que mais perde dinheiro ou oportunidade?</h2>
+    <p class="q-sub">Seja direto — isso define toda a estratégia.</p>
+    <div class="options">
+      <div class="option" onclick="sel(this,'desa','Volume inconsistente')"><div class="okey">A</div><div class="otext">Não consigo gerar volume consistente de clientes</div></div>
+      <div class="option" onclick="sel(this,'desa','Perco na conversão')"><div class="okey">B</div><div class="otext">Até gero leads, mas perco vendas no atendimento / conversão</div></div>
+      <div class="option" onclick="sel(this,'desa','CPL/CPA alto')"><div class="okey">C</div><div class="otext">Estou pagando caro para vender (CPL/CPA alto)</div></div>
+      <div class="option" onclick="sel(this,'desa','Escala não acompanha')"><div class="okey">D</div><div class="otext">Quando tento escalar, o resultado não acompanha</div></div>
+      <div class="option" onclick="sel(this,'desa','Falta estratégia')"><div class="okey">E</div><div class="otext">Sinto que falta estratégia — parece tudo meio "solto"</div></div>
+    </div>
+    <span class="ferr" id="e-desa">Selecione uma opção.</span>
+  </div>
+</div>
+
+<!-- Q7 · PREVISIBILIDADE -->
+<div class="screen" id="s7">
+  <div class="inner">
+    <div class="q-num">07</div>
+    <h2 class="q-title">Hoje você tem previsibilidade de vendas ou ainda depende de dias bons e ruins?</h2>
+    <p class="q-sub">Isso nos diz muito sobre a maturidade da sua operação.</p>
+    <div class="options">
+      <div class="option" onclick="sel(this,'prev','Tenho previsibilidade')"><div class="okey">A</div><div class="otext">Tenho previsibilidade — sei mais ou menos o que vem por mês</div></div>
+      <div class="option" onclick="sel(this,'prev','Meia a meia')"><div class="okey">B</div><div class="otext">Às vezes previsível, às vezes uma montanha-russa</div></div>
+      <div class="option" onclick="sel(this,'prev','Dependo da sorte')"><div class="okey">C</div><div class="otext">Dependo muito de dias bons — sem consistência</div></div>
+    </div>
+    <span class="ferr" id="e-prev">Selecione uma opção.</span>
+  </div>
+</div>
+
+<!-- Q8 · MOMENTO -->
+<div class="screen" id="s8">
+  <div class="inner">
+    <div class="q-num">08</div>
+    <h2 class="q-title">Qual é o seu momento hoje?</h2>
+    <p class="q-sub">Sem julgamentos — cada fase tem sua estratégia.</p>
+    <div class="options">
+      <div class="option" onclick="sel(this,'momento','Já vendo bem e quero escalar')"><div class="okey">A</div><div class="otext">Já vendo bem e quero escalar</div></div>
+      <div class="option" onclick="sel(this,'momento','Estruturando e quero crescer')"><div class="okey">B</div><div class="otext">Estou estruturando e quero crescer</div></div>
+      <div class="option" onclick="sel(this,'momento','Ainda validando o negócio')"><div class="okey">C</div><div class="otext">Ainda estou validando o negócio</div></div>
+    </div>
+    <span class="ferr" id="e-momento">Selecione uma opção.</span>
+  </div>
+</div>
+
+<!-- Q9 · INSTAGRAM -->
+<div class="screen" id="s9">
+  <div class="inner">
+    <div class="q-num">09</div>
+    <h2 class="q-title">Qual o Instagram da sua empresa?</h2>
+    <p class="q-sub">Vamos dar uma olhada antes de te ligar — fica bem melhor a conversa.</p>
+    <div class="input-wrap">
+      <input type="text" id="instagram" placeholder="@suaempresa" autocomplete="off"
+        onkeydown="if(event.key==='Enter')nfi('instagram','e-insta')"
+        oninput="minsta(this)">
+    </div>
+    <span class="ferr" id="e-insta">Insira o @ do seu Instagram.</span>
+    <div class="hint">Pressione <kbd>Enter</kbd> para continuar</div><br>
+    <button class="btn-main" onclick="nfi('instagram','e-insta')">Continuar <span class="arrow">→</span></button>
+  </div>
+</div>
+
+<!-- Q11 · WHATSAPP -->
+<div class="screen" id="s11">
+  <div class="inner">
+    <div class="q-num">11</div>
+    <h2 class="q-title">E o seu WhatsApp?</h2>
+    <p class="q-sub">Última etapa! Nossa equipe entra em contato em até 24h.</p>
+    <div class="input-wrap">
+      <input type="tel" id="tel" placeholder="(00) 00000-0000" autocomplete="off"
+        onkeydown="if(event.key==='Enter')submit()" oninput="mphone(this)">
+    </div>
+    <span class="ferr" id="e-tel">Insira um número válido.</span>
+    <div class="hint">Pressione <kbd>Enter</kbd> para enviar</div><br>
+    <button class="btn-main" onclick="submit()">Enviar diagnóstico <span class="arrow">→</span></button>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div class="screen" id="s12">
+  <div class="inner" style="text-align:center">
+    <div class="success-ico">🚀</div>
+    <h2 class="success-h">Tudo <span class="blue">certo!</span></h2>
+    <p class="success-p">Seus dados chegaram. Um estrategista da Zenith vai analisar seu perfil e entrar em contato no WhatsApp em até <strong>24 horas</strong>.</p>
+    <div class="success-pill">
+      <div class="s-dot"></div>
+      👉 Agora é comigo. Fica atento ao WhatsApp 👀
+    </div>
+    <a href="https://www.instagram.com/zenithadsoficial/" target="_blank" style="display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:#fff;padding:14px 28px;border-radius:10px;font-family:Inter,sans-serif;font-weight:700;font-size:14px;text-decoration:none;margin-bottom:24px;transition:opacity 0.2s" onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+      Seguir @zenithadsoficial
+    </a>
+    <p style="font-size:11px;color:#ccc;margin-bottom:12px">Progresso completo</p>
+    <div class="xp-final">
+      <div class="xpf-dots">
+        <div class="xpf-dot"></div><div class="xpf-dot"></div><div class="xpf-dot"></div>
+        <div class="xpf-dot"></div><div class="xpf-dot"></div><div class="xpf-dot"></div>
+        <div class="xpf-dot"></div><div class="xpf-dot"></div><div class="xpf-dot"></div>
+        <div class="xpf-dot"></div><div class="xpf-dot"></div>
+      </div>
+      <span class="xpf-lbl">10 / 10</span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /quiz-wrap -->
+
+<div class="nav-bot"><button class="btn-back gone" id="bbk" onclick="back()">← Voltar</button></div>
+<div class="xp-bar" id="xpbar"><span class="xp-lbl">PROGRESSO</span><div class="xp-dots" id="xpdots"></div></div>
 
 <script>
-  // ─── STATE ───
-  let currentScreen = 0;
-  const totalQuestions = 8;
-  const answers = {};
+// ── FLOW ──
+// 0=welcome  v1,v2,v3=value  1-11=questions  12=success
+const FLOW = [0,'v1','v2','v3',1,2,3,4,5,6,7,8,9,11,12];
+const TQ = 10;
+let fi = 0; // flow index
+const ans = {};
+let cntDone = false;
 
-  // Render XP dots
-  const xpDots = document.getElementById('xpDots');
-  for (let i = 0; i < totalQuestions; i++) {
-    const d = document.createElement('div');
-    d.className = 'xp-dot';
-    d.id = 'dot-' + i;
-    xpDots.appendChild(d);
+// build xp dots
+const xpd = document.getElementById('xpdots');
+for(let i=0;i<TQ;i++){
+  const d=document.createElement('div');
+  d.className='xp-dot'; d.id='xpd'+i; xpd.appendChild(d);
+}
+
+function cid(){ return FLOW[fi]; }
+function isV(id){ return typeof id==='string'; }
+function isQ(id){ return typeof id==='number'&&id>=1&&id<=TQ; }
+
+// ── NAVIGATE ──
+function go(target){
+  const pidx = fi;
+  const nidx = FLOW.indexOf(target);
+  if(nidx<0)return;
+
+  // exit current
+  const pe = document.getElementById(isV(FLOW[pidx])?'s'+FLOW[pidx]:'s'+FLOW[pidx]);
+  pe.classList.remove('active');
+  pe.classList.add('exit-up');
+  setTimeout(()=>pe.classList.remove('exit-up'),600);
+
+  fi = nidx;
+  const ne = document.getElementById('s'+cid());
+  ne.classList.add('active');
+
+  setTimeout(()=>{ const inp=ne.querySelector('input'); if(inp)inp.focus(); },500);
+
+  if(cid()==='v3') triggerCount();
+  ui();
+}
+
+function back(){
+  if(fi<=1)return;
+  const pe=document.getElementById('s'+cid());
+  pe.classList.remove('active');
+  Object.assign(pe.style,{transition:'none',opacity:'0',transform:'translateY(36px)'});
+  setTimeout(()=>{pe.style.transition='';},40);
+
+  fi--;
+  const ne=document.getElementById('s'+cid());
+  ne.classList.add('active');
+  Object.assign(ne.style,{transition:'none',opacity:'0',transform:'translateY(-36px)'});
+  setTimeout(()=>{ne.style.transition='';ne.style.opacity='1';ne.style.transform='translateY(0)';},40);
+  ui();
+}
+
+function next(){ go(FLOW[fi+1]); }
+
+// ── UI UPDATE ──
+function ui(){
+  const id=cid();
+  const qIdx = isQ(id) ? FLOW.indexOf(id)-4 : 0; // 1-based
+
+  // progress bar — only for questions
+  const pct = isQ(id) ? ((FLOW.indexOf(id)-4)/TQ)*100 : id===12?100:0;
+  document.getElementById('pbar').style.width=pct+'%';
+
+  // counter
+  document.getElementById('sctr').textContent = isQ(id) ? (FLOW.indexOf(id)-3)+' de '+TQ : '';
+
+  // back
+  const bb=document.getElementById('bbk');
+  if(fi>1 && id!==12){ bb.classList.remove('gone'); }
+  else { bb.classList.add('gone'); }
+
+  // xp bar
+  const xb=document.getElementById('xpbar');
+  xb.style.display = isQ(id)?'flex':'none';
+  if(isQ(id)){
+    const qn=FLOW.indexOf(id)-4;
+    for(let i=0;i<TQ;i++) document.getElementById('xpd'+i).classList.toggle('on',i<qn);
   }
 
-  // ─── NAVIGATION ───
-  function goTo(n) {
-    const prev = document.getElementById('screen-' + currentScreen);
-    prev.classList.remove('active');
-    prev.classList.add('exit-up');
-    setTimeout(() => prev.classList.remove('exit-up'), 600);
-
-    currentScreen = n;
-    const next = document.getElementById('screen-' + n);
-    next.classList.add('active');
-
-    // Focus input if exists
-    setTimeout(() => {
-      const inp = next.querySelector('input');
-      if (inp) inp.focus();
-    }, 500);
-
-    updateUI();
+  // personalise q2
+  if(id===2&&ans.nome){
+    document.getElementById('q2t').textContent=ans.nome.split(' ')[0]+', qual é o seu segmento?';
   }
+}
 
-  function goBack() {
-    if (currentScreen <= 1) return;
-    const prev = document.getElementById('screen-' + currentScreen);
-    prev.classList.remove('active');
-    prev.style.transition = 'none';
-    prev.style.opacity = '0';
-    prev.style.transform = 'translateY(40px)';
-    setTimeout(() => { prev.style.transition = ''; }, 50);
-
-    currentScreen--;
-    const next = document.getElementById('screen-' + currentScreen);
-    next.classList.add('active');
-    next.style.transition = 'none';
-    next.style.opacity = '0';
-    next.style.transform = 'translateY(-40px)';
-    setTimeout(() => {
-      next.style.transition = '';
-      next.style.opacity = '1';
-      next.style.transform = 'translateY(0)';
-    }, 50);
-
-    updateUI();
-  }
-
-  function updateUI() {
-    const isQuestion = currentScreen >= 1 && currentScreen <= totalQuestions;
-    const isWelcome = currentScreen === 0;
-    const isSuccess = currentScreen === totalQuestions + 1;
-
-    // Progress bar
-    const pct = isWelcome ? 0 : isSuccess ? 100 : (currentScreen / totalQuestions) * 100;
-    document.getElementById('progressBar').style.width = pct + '%';
-
-    // Counter
-    const counter = document.getElementById('stepCounter');
-    counter.textContent = isQuestion ? currentScreen + ' de ' + totalQuestions : '';
-
-    // Back button
-    const back = document.getElementById('btnBack');
-    if (currentScreen > 1 && !isSuccess) {
-      back.classList.remove('hidden');
-    } else {
-      back.classList.add('hidden');
-    }
-
-    // XP bar
-    const xpBar = document.getElementById('xpBar');
-    xpBar.style.display = isQuestion ? 'flex' : 'none';
-
-    // Fill dots
-    for (let i = 0; i < totalQuestions; i++) {
-      const dot = document.getElementById('dot-' + i);
-      if (i < currentScreen) {
-        dot.classList.add('filled');
-      } else {
-        dot.classList.remove('filled');
-      }
-    }
-
-    // Update q2 title with name
-    if (currentScreen === 2 && answers.nome) {
-      document.getElementById('q2-title').textContent = answers.nome.split(' ')[0] + ', qual é o seu segmento?';
-    }
-  }
-
-  // ─── OPTION SELECT ───
-  function selectOption(el, key, value) {
-    const parent = el.parentElement;
-    parent.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
-    el.classList.add('selected');
-    answers[key] = value;
-
-    // Hide error
-    const errEl = document.getElementById('err-' + key);
-    if (errEl) errEl.classList.remove('show');
-
-    // Auto-advance after short delay
-    setTimeout(() => {
-      if (currentScreen < totalQuestions) goTo(currentScreen + 1);
-    }, 350);
-  }
-
-  // ─── INPUT VALIDATION ───
-  function nextFromInput(fieldId, errId, isEmail) {
-    const val = document.getElementById(fieldId).value.trim();
-    const errEl = document.getElementById(errId);
-
-    if (!val || (isEmail && !/\S+@\S+\.\S+/.test(val))) {
-      errEl.classList.add('show');
-      document.getElementById(fieldId).focus();
-      return;
-    }
-    errEl.classList.remove('show');
-    answers[fieldId] = val;
-    goTo(currentScreen + 1);
-  }
-
-  // ─── PHONE MASK ───
-  function maskPhone(input) {
-    let v = input.value.replace(/\D/g, '');
-    if (v.length <= 11) {
-      v = v.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
-      v = v.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
-      v = v.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
-      v = v.replace(/^(\d{0,2})/, '($1');
-    }
-    input.value = v;
-  }
-
-  // ─── SUBMIT ───
-  function submitQuiz() {
-    const tel = document.getElementById('telefone').value.trim();
-    const errEl = document.getElementById('err-telefone');
-    if (!tel || tel.replace(/\D/g,'').length < 10) {
-      errEl.classList.add('show');
-      document.getElementById('telefone').focus();
-      return;
-    }
-    errEl.classList.remove('show');
-    answers.telefone = tel;
-    answers.timestamp = new Date().toLocaleString('pt-BR');
-
-    // Save locally
-    const leads = JSON.parse(localStorage.getItem('zenith_leads') || '[]');
-    leads.push(answers);
-    localStorage.setItem('zenith_leads', JSON.stringify(leads));
-
-    // Success
-    document.getElementById('success-name').textContent = 'Olá, ' + (answers.nome ? answers.nome.split(' ')[0] : '') + '!';
-
-    // Go to success
-    const prev = document.getElementById('screen-' + currentScreen);
-    prev.classList.remove('active');
-    prev.classList.add('exit-up');
-
-    currentScreen = 9;
-    const next = document.getElementById('screen-9');
-    next.classList.add('active');
-
-    document.getElementById('progressBar').style.width = '100%';
-    document.getElementById('stepCounter').textContent = '';
-    document.getElementById('btnBack').classList.add('hidden');
-    document.getElementById('xpBar').style.display = 'none';
-  }
-
-  // ─── KEYBOARD SHORTCUTS ───
-  document.addEventListener('keydown', (e) => {
-    const screen = document.getElementById('screen-' + currentScreen);
-    const options = screen.querySelectorAll('.options .option, .options-grid .option');
-
-    if (options.length > 0 && !screen.querySelector('input')) {
-      const keys = ['a','b','c','d','e','f','g','h'];
-      const idx = keys.indexOf(e.key.toLowerCase());
-      if (idx >= 0 && idx < options.length) {
-        options[idx].click();
-      }
-    }
+// ── COUNT UP (v3) ──
+function triggerCount(){
+  if(cntDone)return; cntDone=true;
+  document.querySelectorAll('.cntup').forEach(el=>{
+    const t=parseFloat(el.dataset.t), s=el.dataset.s||'';
+    const dec=String(t).includes('.');
+    const dur=1200, start=performance.now();
+    (function tick(now){
+      const p=Math.min((now-start)/dur,1);
+      const e=1-Math.pow(1-p,3);
+      el.textContent=(dec?(t*e).toFixed(1):Math.floor(t*e))+s;
+      if(p<1)requestAnimationFrame(tick);
+    })(performance.now());
   });
+}
 
-  // Init
-  updateUI();
+// ── SELECT OPTION ──
+function sel(el,key,val){
+  el.parentElement.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  ans[key]=val;
+  const err=document.getElementById('e-'+key);
+  if(err)err.classList.remove('show');
+  setTimeout(next,320);
+}
+
+// ── INPUT ──
+function nfi(fid,eid,isEmail){
+  const v=document.getElementById(fid).value.trim();
+  const err=document.getElementById(eid);
+  if(!v||(isEmail&&!/\S+@\S+\.\S+/.test(v))){
+    err.classList.add('show');
+    document.getElementById(fid).focus();
+    return;
+  }
+  err.classList.remove('show');
+  ans[fid]=v;
+  next();
+}
+
+// ── PHONE MASK ──
+function mphone(inp){
+  let v=inp.value.replace(/\D/g,'').slice(0,11);
+  if(v.length===11) v=v.replace(/(\d{2})(\d{5})(\d{4})/,'($1) $2-$3');
+  else if(v.length===10) v=v.replace(/(\d{2})(\d{4})(\d{4})/,'($1) $2-$3');
+  else if(v.length>6) v=v.replace(/(\d{2})(\d{4,5})(\d*)/,'($1) $2-$3');
+  else if(v.length>2) v=v.replace(/(\d{2})(\d*)/,'($1) $2');
+  else if(v.length>0) v='('+v;
+  inp.value=v;
+}
+
+// ── INSTAGRAM MASK ──
+function minsta(inp){
+  let v=inp.value;
+  if(!v.startsWith('@')) v='@'+v.replace(/@/g,'');
+  if(v==='@') v='';
+  inp.value=v;
+}
+
+// ── SUBMIT ──
+function submit(){
+  const t=document.getElementById('tel').value.trim();
+  const err=document.getElementById('e-tel');
+  if(!t||t.replace(/\D/g,'').length<10){err.classList.add('show');document.getElementById('tel').focus();return;}
+  err.classList.remove('show');
+  ans.tel=t; ans.ts=new Date().toLocaleString('pt-BR');
+  const leads=JSON.parse(localStorage.getItem('z_leads')||'[]');
+  leads.push(ans); localStorage.setItem('z_leads',JSON.stringify(leads));
+
+  // ── MAKE WEBHOOK → Google Sheets ──
+  const WEBHOOK = 'https://hook.us2.make.com/q0ngjgm9me7g3xa9k6t42wxcn08w81wy';
+  fetch(WEBHOOK, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(ans)
+  }).catch(()=>{});
+
+  // ── META PIXEL · Lead ──
+  if(window.fbq) fbq('track', 'Lead');
+
+  const pe=document.getElementById('s11');
+  pe.classList.remove('active'); pe.classList.add('exit-up');
+  fi=FLOW.indexOf(12);
+  document.getElementById('s12').classList.add('active');
+  document.getElementById('pbar').style.width='100%';
+  document.getElementById('sctr').textContent='';
+  document.getElementById('bbk').classList.add('gone');
+  document.getElementById('xpbar').style.display='none';
+}
+
+// ── KEYBOARD ──
+document.addEventListener('keydown',e=>{
+  const id=cid();
+  if(!isQ(id))return;
+  const scr=document.getElementById('s'+id);
+  const opts=scr.querySelectorAll('.options .option,.options-grid .option');
+  if(opts.length&&!scr.querySelector('input')){
+    const idx=['a','b','c','d','e'].indexOf(e.key.toLowerCase());
+    if(idx>=0&&idx<opts.length)opts[idx].click();
+  }
+});
+
+ui();
 </script>
 </body>
 </html>
